@@ -18,32 +18,42 @@ const {
   UserData,
   TotalNumberOfPosts
 } = Routes;
+
 const zero = 0;
+let hasMoreItems = true;
+let totalPosts = "";
+let clicked = false;
+let username = "";
+let emailId = "";
+let myUploads = false;
+let items = zero;
+
 class Timeline extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      postdata: [],
       showPopup: false,
-      items: 0,
-      hasMoreItems: true,
-      totalPosts: "",
-      username: "",
-      email: "",
-      myUploads: false,
-      clicked: false
+      postdata: []
+      //showPopup: false
+      //items: zero
+      // hasMoreItems: true,
+      // totalPosts: "",
+      // username: "",
+      //email: "",
+      // myUploads: false
+      // clicked: false
     };
     this.handlePostUploadForm = this.handlePostUploadForm.bind(this);
   }
   categoryUploadForm = () => {
-    if (!this.state.clicked) {
-      this.state.clicked = true;
+    if (!clicked) {
+      clicked = true;
       const form =
         "category<input type='text' name='category' required/><br /><br /><input type='submit'/> &emsp;";
       document.getElementById("category").innerHTML = form;
     } else {
       document.getElementById("category").innerHTML = "";
-      this.state.clicked = false;
+      clicked = false;
     }
   };
 
@@ -73,9 +83,16 @@ class Timeline extends React.Component {
   };
 
   stateUpdateOnTimelineClick = async () => {
-    this.setState({ myUploads: false, items: zero, hasMoreItems: true });
+    this.setState({
+      // myUploads: false,
+      // items: zero
+      // hasMoreItems: true
+    });
+    items = zero;
+    myUploads = false;
+    hasMoreItems = true;
     await this.totalNumberPosts();
-    await this.allPost(this.state.items);
+    await this.allPost(items);
   };
 
   uploadCategory = event => {
@@ -99,7 +116,7 @@ class Timeline extends React.Component {
           this.props.history.push("/errorpage");
         }
       });
-    this.state.clicked = false;
+    clicked = false;
     document.getElementById("category").innerHTML = "";
   };
 
@@ -111,8 +128,8 @@ class Timeline extends React.Component {
       let category = event.target.category.value;
       let file = event.target.file.files[0];
       let caption = event.target.description.value;
-      let userName = this.state.username;
-      let userEmail = this.state.email;
+      let userName = username;
+      let userEmail = emailId;
       const formdata = new FormData();
       formdata.append("username", userName);
       formdata.append("email", userEmail);
@@ -138,18 +155,20 @@ class Timeline extends React.Component {
   }
 
   togglePopup = () => {
+    // console.log("showPopup", showPopup);
     this.setState({
       showPopup: !this.state.showPopup
     });
   };
 
   loadMorePosts = () => {
-    if (this.state.items <= this.state.totalPosts) {
+    if (items <= totalPosts) {
       setTimeout(async () => {
-        await this.allPost(this.state.items);
+        await this.allPost(items);
       }, 1000);
     } else {
-      this.setState({ hasMoreItems: false });
+      //this.setState({ hasMoreItems: false });
+      hasMoreItems = false;
     }
     return new Promise(resolve => {
       resolve(true);
@@ -159,7 +178,7 @@ class Timeline extends React.Component {
   allPost = skipPosts => {
     const post = {
       Skip: skipPosts,
-      email: this.state.myUploads ? this.state.email : false
+      email: myUploads ? emailId : false
     };
     fetchData(AllPosts, post)
       .then(res => {
@@ -167,14 +186,14 @@ class Timeline extends React.Component {
           let allPostsData = res.data.dataFromDatabase;
           if (skipPosts === zero) {
             this.setState({
-              postdata: allPostsData,
-              items: skipPosts + 5
+              postdata: allPostsData
             });
+            items = skipPosts + 5;
           } else {
             this.setState({
-              postdata: [...this.state.postdata, ...allPostsData],
-              items: skipPosts + 5
+              postdata: [...this.state.postdata, ...allPostsData]
             });
+            items = skipPosts + 5;
           }
         }
       })
@@ -186,9 +205,15 @@ class Timeline extends React.Component {
   };
 
   showMyUploads = async () => {
-    this.setState({ myUploads: true, hasMoreItems: true, items: zero });
+    this.setState({
+      // myUploads: true,
+      // hasMoreItems: true,
+    });
+    items = zero;
+    myUploads = true;
+    hasMoreItems = true;
     await this.totalNumberPosts();
-    await this.allPost(this.state.items);
+    await this.allPost(items);
   };
 
   checkNotlogin = () => {
@@ -200,19 +225,17 @@ class Timeline extends React.Component {
   userDetails = () => {
     let UserID = { id: localStorage.getItem("userId") };
     fetchData(UserData, UserID).then(res => {
-      this.setState({
-        username: res.data[zero].username,
-        email: res.data[zero].email
-      });
+      username = res.data[zero].username;
+      emailId = res.data[zero].email;
     });
   };
 
   totalNumberPosts = () => {
-    const data = { email: this.state.myUploads ? this.state.email : false };
+    const data = { email: myUploads ? emailId : false };
     fetchData(TotalNumberOfPosts, data)
       .then(res => {
         if (res) {
-          this.setState({ totalPosts: res.data.counts });
+          totalPosts = res.data.counts;
           // return new Promise(resolve => {
           //   resolve(true);
           // });
@@ -225,16 +248,15 @@ class Timeline extends React.Component {
       });
   };
 
-  componentWillUnmount() {
-    this.props.resetLoginState();
-  }
-
   static getDerivedStateFromError(error) {
     return { hasError: true };
   }
 
+  componentWillUnmount() {
+    items = zero;
+  }
+
   componentDidMount() {
-    //console.log("component did mount");
     this.totalNumberPosts();
     this.userDetails();
     this.checkNotlogin();
@@ -244,16 +266,15 @@ class Timeline extends React.Component {
   render() {
     const {
       hasError,
-      hasMoreItems,
+      // hasMoreItems,
       showPopup,
-      postdata,
-      items,
-      username
+      postdata
+      //items
+      // username
     } = this.state;
     if (hasError) {
       return <div>Something went wrong</div>;
     }
-    console.log("rensering");
     return (
       <div>
         <TimelineBodyComponent

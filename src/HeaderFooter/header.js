@@ -4,13 +4,14 @@ import PropTypes from "prop-types";
 
 import LeftHeader from "./leftHeader";
 import RightHeader from "./rightHeader";
-
+import { resetLoginState } from "../redux/actions";
 class Header extends React.Component {
   constructor(props) {
     super(props);
   }
   logout = () => {
     localStorage.removeItem("userId");
+    this.props.resetLoginState();
   };
   render() {
     const { loginState } = this.props;
@@ -32,4 +33,11 @@ Header.propTypes = {
 function mapStateToProps(state) {
   return { loginState: state.loginStateReducer.loginState };
 }
-export default connect(mapStateToProps, null)(Header);
+
+const mapDispatchToProps = dispatch => {
+  return {
+    resetLoginState: () => dispatch(resetLoginState())
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(Header);
