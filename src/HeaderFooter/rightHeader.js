@@ -13,13 +13,13 @@ export default function Rightheader(props) {
           <input type="text" placeholder="Search" className="txt_box" />
           <div className="msg_box">
             <a href="#">
-              <span className="msg_count">4</span>
+              <span className="msg_count">100</span>
             </a>
           </div>
 
           <div className="pro_info pull-right">
             <div className="pro_icn">
-              <img src="images/pic_small.png" />
+              <img src="/images/pic_small.png" />
             </div>
             <div className="pro_txt">
               <b className="caret"></b>
