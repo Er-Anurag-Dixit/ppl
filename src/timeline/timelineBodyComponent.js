@@ -1,47 +1,102 @@
-import React from "react";
-import InfiniteLoader from "react-window-infinite-loader";
+import React, { useCallback, useState } from "react";
+// import InfiniteLoader from "react-window-infinite-loader";
 import Helmet from "react-helmet";
-import { FixedSizeList } from "react-window";
+// import { FixedSizeList } from "react-window";
 import PropTypes from "prop-types";
+import { connect } from "react-redux";
 
-import Post from "./posts";
 import Popup from "./popup.js";
 import RightButton from "./rightButton";
 import "./style.css";
 import Featured from "../shared/featured";
 import UserProfileComponent from "./userProfileComponent";
-import Categories from "../shared/categories";
-//import InfiniteScroll from "react-infinite-scroller";
+// import CategoryList from "../shared/categories";
+import Scroller from "./scroller";
+import fetchData from "../shared/sharedFunctions";
+// import CategoryForm from "../shared/categoryForm";
+import CategoryComponent from "../shared/CategoryComponent";
+import { updateCategories } from "../redux/actions";
+import { Routes } from "../config";
 
-export default function TimelineBodyComponent(props) {
-  const getPost = ({ index, style }) => {
-    if (props.postdata[index]) {
-      return (
-        <Post
-          style={style}
-          data={props.postdata[index]}
-          likePost={props.likePost}
-        />
-      );
+const { Upload_Category } = Routes;
+
+const TimelineBodyComponent = props => {
+  // const getPost = ({ index, style }) => {
+  //   if (props.postdata[index]) {
+  //     return (
+  //       <Post
+  //         style={style}
+  //         data={props.postdata[index]}
+  //         likePost={props.likePost}
+  //         downLoad={props.downLoad}
+  //       />
+  //     );
+  //   } else {
+  //     return null;
+  //   }
+  // };
+  // const callBackFunction = useCallback(
+  //   id => {
+  //     props.likePost(id);
+  //   },
+  //   [props.likePost]
+  // );
+
+  const [clicked, setClicked] = useState(false);
+
+  const categoryUploadForm = () => {
+    if (!clicked) {
+      setClicked(true);
     } else {
-      return null;
+      setClicked(false);
     }
   };
+
+  const uploadCategory = function(event) {
+    event.preventDefault();
+    let checkIfAlreadyExist = false;
+    props.category.map(data => {
+      if (data.category === event.target.category.value.toLowerCase()) {
+        checkIfAlreadyExist = true;
+      }
+    });
+    if (checkIfAlreadyExist) {
+      alert("This category already exist");
+      event.target.category.value = "";
+    } else {
+      const newCategory = event.target.category.value;
+      const categoryToBeUploaded = { category: newCategory };
+      fetchData(Upload_Category, categoryToBeUploaded).then(res => {
+        if (res && res.data && res.data.status === "Category Inserted") {
+          let allCategory = res?.data?.dataFromDatabase?.map(data => {
+            return data;
+          });
+          props.updateCategory(allCategory);
+        }
+      });
+      setClicked(false);
+    }
+  };
+
   const {
     togglePopup,
-    categoryUploadForm,
-    uploadCategory,
+    // categoryUploadForm,
+    // uploadCategory,
     username,
     showMyUploads,
     stateUpdateOnTimelineClick,
     handlePostUploadForm,
-    items,
+    // items,
     loadMorePosts,
     hasMoreItems,
     postdata,
-    likePost
+    likePost,
+    hasError,
+    downLoad
   } = props;
-
+  if (hasError) {
+    return <div>Something is wrong</div>;
+  }
   return (
     <div>
       <Helmet>
@@ -54,9 +109,11 @@ export default function TimelineBodyComponent(props) {
               togglePopup={togglePopup.bind(this)}
               categoryUploadForm={categoryUploadForm}
             />
+            <CategoryComponent
+              uploadCategory={uploadCategory}
+              clicked={clicked}
+            />
 
-            <form id="category" onSubmit={uploadCategory}></form>
-            <Categories />
             <Featured />
           </div>
           <div className="content_lft">
@@ -73,73 +130,50 @@ export default function TimelineBodyComponent(props) {
                 />
               ) : null}
             </div>
+            {/*<div> 
             <InfiniteLoader
-              isItemLoaded={() => {
-                return !hasMoreItems;
-              }}
-              style={{ width: "100" }}
-              itemCount={10}
-              loadMoreItems={() => {
-                loadMorePosts();
-              }}
-            >
-              {({ onItemsRendered, ref }) => (
-                <FixedSizeList
-                  height={3000}
-                  width={750}
+                  isItemLoaded={() => {
+                    return !hasMoreItems;
+                  }}
+                  style={{ width: "100" }}
                   itemCount={10}
-                  itemSize={650}
-                  onItemsRendered={onItemsRendered}
-                  ref={ref}
+                  loadMoreItems={() => {
+                    loadMorePosts();
+                  }}
                 >
-                  {getPost}
-                </FixedSizeList>
-              )}
-            </InfiniteLoader>
-            {/* <InfiniteScroll
-                length={items}
-                loadMore={loadMorePosts}
-                hasMore={hasMoreItems}
-                loader={
-                  hasMoreItems ? (
-                    <div
-                      className="loader"
-                      key={0}
-                      style={{ marginLeft: "300px" }}
+                  {({ onItemsRendered, ref }) => (
+                    <FixedSizeList
+                      height={3000}
+                      width={750}
+                      itemCount={10}
+                      itemSize={650}
+                      onItemsRendered={onItemsRendered}
+                      ref={ref}
                     >
-                      {" "}
-                      <img
-                        src="images/giphy.gif"
-                        style={{ width: "10%", height: "10%" }}
-                      ></img>
-                    </div>
-                  ) : (
-                    <div className="" style={{ marginLeft: "300px" }}>
-                      <p style={{ width: "20%", height: "10%" }}>
-                        Yay! You have seen it all
-                      </p>
-                    </div>
-                  )
-                }
-              >
-                <ul>
-                  {postdata.map((names, i) => (
-                    <Post key={i} Postdata={names} likeFunction={likePost} />
-                  ))}
-                </ul>
-              </InfiniteScroll> */}
+                      {getPost}
+                    </FixedSizeList>
+                  )}
+                </InfiniteLoader> 
+               </div>
+               */}
+            <Scroller
+              onlikePost={likePost}
+              postdata={postdata}
+              downLoad={downLoad}
+              loadMorePosts={loadMorePosts}
+              hasMoreItems={hasMoreItems}
+            />
           </div>
         </div>
       </div>
     </div>
   );
-}
+};
 TimelineBodyComponent.propTypes = {
   logout: PropTypes.func,
   togglePopup: PropTypes.func,
-  categoryUploadForm: PropTypes.func,
-
-  uploadCategory: PropTypes.func,
+  // categoryUploadForm: PropTypes.func,
+  // uploadCategory: PropTypes.func,
   username: PropTypes.string,
   showMyUploads: PropTypes.func,
   stateUpdateOnTimelineClick: PropTypes.func,
@@ -151,3 +185,16 @@ TimelineBodyComponent.propTypes = {
   likePost: PropTypes.func,
   showPopup: PropTypes.bool
 };
+
+function mapStateToProps(state) {
+  return { category: state.CategoryReducer.category };
+}
+const mapDispatchToProps = dispatch => {
+  return {
+    updateCategory: data => dispatch(updateCategories(data))
+  };
+};
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(TimelineBodyComponent);

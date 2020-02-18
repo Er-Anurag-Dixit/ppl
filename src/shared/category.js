@@ -1,9 +1,8 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-export default function Category(props) {
-  const { category } = props.categoryData;
-
+const Category = props => {
+  const category = props.categoryData;
   return (
     <div>
       <div>
@@ -18,8 +17,10 @@ export default function Category(props) {
       </div>
     </div>
   );
-}
-Category.propTypes = {
-  category: PropTypes.string,
-  categoryData: PropTypes.object
 };
+
+Category.propTypes = {
+  category: PropTypes.string
+};
+
+export default Category;

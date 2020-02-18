@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import Helmet from "react-helmet";
 
-import Server from "../shared/config";
+import Server from "../config";
+import SignupForm from "./signupForm";
 import WelcomeComponent from "../shared/welcomeComponent";
 
 class Signup extends React.Component {
@@ -12,7 +13,7 @@ class Signup extends React.Component {
     this.state = {
       heading: "Create an account",
       status: "",
-      hasError: true
+      hasError: false
     };
     this.submitFunction = this.submitFunction.bind(this);
   }
@@ -36,7 +37,6 @@ class Signup extends React.Component {
             document.getElementById("input").focus();
           }
           eventTarget.email.value = null;
-          // console.log("Data is coming",res.data);
           // this.setState({status: res.data})
         } else {
           this.setState({ heading: "SignUp Successfull" });
@@ -78,64 +78,10 @@ class Signup extends React.Component {
             <div className="content_rgt">
               <div className="register_sec">
                 <h1>{heading}</h1>
-                <form onSubmit={this.submitFunction}>
-                  <ul>
-                    <li>
-                      <span>Username</span>
-                      <input
-                        type="text"
-                        placeholder="Enter your username"
-                        name="username"
-                        required
-                      />
-                    </li>
-                    <li>
-                      <span>Password</span>
-                      <input
-                        type="password"
-                        placeholder="Enter your password"
-                        name="password"
-                        required
-                      />
-                    </li>
-                    <li>
-                      <span>Email</span>
-                      <input
-                        id="input"
-                        type="email"
-                        placeholder="Enter your email"
-                        name="email"
-                        required
-                      />
-                    </li>
-                    <li>{status}</li>
-                    <li>
-                      <span>First Name</span>
-                      <input
-                        type="text"
-                        placeholder="Enter your first name"
-                        name="fname"
-                        required
-                      />
-                    </li>
-                    <li>
-                      <span>Last Name</span>
-                      <input
-                        type="text"
-                        placeholder="Enter your last name"
-                        name="lname"
-                        required
-                      />
-                    </li>
-                    <li>
-                      <input type="checkbox" required />I agree to Term &amp;
-                      Conditions
-                    </li>
-                    <li>
-                      <input type="submit" />
-                    </li>
-                  </ul>
-                </form>
+                <SignupForm
+                  submitFunction={this.submitFunction}
+                  status={status}
+                />
                 <div className="addtnal_acnt">
                   I already have an account.
                   <Link to="/login">Login My Account !</Link>

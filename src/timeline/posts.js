@@ -3,12 +3,10 @@ import moment from "moment";
 import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
 
-import PostActivityComponent from "../shared/postActivityComponent";
-import { ServerUrl } from "../shared/config";
+import { ServerUrl } from "../config";
 
-export default function Post(props) {
+const Post = React.memo(props => {
   const { caption, category, username, date, _id, image } = props.data;
-  const { likePost, data } = props;
   return (
     <div>
       <div className="contnt_2">
@@ -24,10 +22,10 @@ export default function Post(props) {
             </div>
             <div className="div_top_rgt">
               <span className="span_date">
-                {date ? moment(date).format("MMMM Do YYYY") : Date.now()}
+                {date ? moment(date).format("MMMM DD YYYY") : Date.now()}
               </span>
               <span className="span_time">
-                {date ? moment(date).format("hh:mm:ss a") : Date.now()}
+                {date ? moment(date).format("hh:mm:ss A") : Date.now()}
               </span>
             </div>
           </div>
@@ -36,12 +34,14 @@ export default function Post(props) {
               <img src={ServerUrl + "/" + image} alt="pet" />
             </Link>
           </div>
-          <PostActivityComponent onlikePost={likePost} Postdata={data} />
         </div>
       </div>
     </div>
   );
-}
+});
+
+export default Post;
+
 Post.propTypes = {
   caption: PropTypes.string,
   category: PropTypes.string,

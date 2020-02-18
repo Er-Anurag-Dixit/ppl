@@ -1,31 +1,33 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import PostBottomButton from "./postBottomButton";
 import PropTypes from "prop-types";
 
-export default function PostActivityComponent(props) {
-  const { noOfComments, _id, likes } = props?.Postdata;
-  const { onlikePost } = props;
+import PostBottomButton from "./postBottomButton";
 
+const PostActivityComponent = props => {
+  const { noOfComments, _id, likes, image } = props?.Postdata;
+  const { onlikePost, downLoad } = props;
   return (
     <div className="div_btm">
       <div className="btm_list">
         <ul>
           <li>
-            <a href="#">
+            <a>
               <PostBottomButton
                 value={" "}
                 name={"Share"}
                 image="/images/icon_001.png"
+                id="flag"
               />
             </a>
           </li>
           <li>
-            <a href="#">
+            {" "}
+            <a onClick={() => downLoad(image)}>
               <PostBottomButton
                 value={" "}
-                name={"flag"}
-                image="/images/icon_002.png"
+                name={"Download"}
+                image="/images/download.png"
               />
             </a>
           </li>
@@ -40,6 +42,7 @@ export default function PostActivityComponent(props) {
                 value={likes.length}
                 name={"Like"}
                 image="/images/icon_003.png"
+                id="like"
               />
             </a>
           </li>
@@ -56,10 +59,14 @@ export default function PostActivityComponent(props) {
       </div>
     </div>
   );
-}
+};
+
 PostActivityComponent.propType = {
   noOfComments: PropTypes.number,
   _id: PropTypes.string,
   likes: PropTypes.array,
-  onlikePost: PropTypes.func
+  onlikePost: PropTypes.func,
+  downLoad: PropTypes.func
 };
+
+export default PostActivityComponent;

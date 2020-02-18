@@ -11,6 +11,7 @@ class Header extends React.Component {
   }
   logout = () => {
     localStorage.removeItem("userId");
+    localStorage.removeItem("username");
     this.props.resetLoginState();
   };
   render() {
@@ -18,7 +19,7 @@ class Header extends React.Component {
     return (
       <div>
         <div className="header">
-          <LeftHeader />
+          <LeftHeader loginState={loginState} />
           <RightHeader loginState={loginState} logout={this.logout} />
         </div>
       </div>

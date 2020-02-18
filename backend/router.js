@@ -55,22 +55,29 @@ approuter.post("/comments", function(req, res) {
       };
       userschema4.create(variable, function(err, resu) {
         if (resu) {
-          userschema4.find({ cID: req.body.imageId }, function(err, re) {
-            // console.log("comments--->", re, "length", re.length);
-            userschema2
-              .updateOne({ _id: req.body.imageId }, { noOfComments: re.length })
-              .then(result => {
-                // userschema2.find({ _id: req.body.imageId }).then(data => {
-                //   console.log("result=======>", data);
-                // });
-                // console.log("--------", result);
-              });
-            let addStatusInResult = {
-              dataFromDatabase: re,
-              status: "Comment Inserted"
-            };
-            res.send(addStatusInResult);
-          });
+          userschema4.find(
+            { cID: req.body.imageId },
+            { comment: 1, user: 1, _id: 0 },
+            function(err, re) {
+              // console.log("comments--->", re, "length", re.length);
+              userschema2
+                .updateOne(
+                  { _id: req.body.imageId },
+                  { noOfComments: re.length }
+                )
+                .then(result => {
+                  // userschema2.find({ _id: req.body.imageId }).then(data => {
+                  //   console.log("result=======>", data);
+                  // });
+                  // console.log("--------", result);
+                });
+              let addStatusInResult = {
+                dataFromDatabase: re,
+                status: "Comment Inserted"
+              };
+              res.send(addStatusInResult);
+            }
+          );
         } else {
           let addStatusInResult = {
             dataFromDatabase: resu,
@@ -83,7 +90,10 @@ approuter.post("/comments", function(req, res) {
 });
 
 approuter.post("/allcomments", function(req, res) {
-  userschema4.find({ cID: req.body.imageId }, function(err, resu) {
+  userschema4.find({ cID: req.body.imageId }, { comment: 1, user: 1 }, function(
+    err,
+    resu
+  ) {
     if (resu) {
       let addStatusInResult = {
         dataFromDatabase: resu

@@ -142,13 +142,24 @@ timelinerouter.post("/category", (req, res) => {
     if (!result) {
       userschema3.create(req.body, function(err, resu) {
         if (resu) {
-          userschema3.find({}, function(err, re) {
-            let addStatusInResult = {
-              dataFromDatabase: re,
-              status: "Category Inserted"
-            };
-            res.send(addStatusInResult);
-          });
+          userschema3
+            .find({})
+            .sort({ category: 1 })
+            .then(re => {
+              if (re) {
+                let addStatusInResult = {
+                  dataFromDatabase: re,
+                  status: "Category Inserted"
+                };
+                res.send(addStatusInResult);
+              } else {
+                let addStatusInResult = {
+                  dataFromDatabase: resu,
+                  status: "Error"
+                };
+                res.send(addStatusInResult);
+              }
+            });
         } else {
           let addStatusInResult = {
             dataFromDatabase: resu,
@@ -167,21 +178,24 @@ timelinerouter.post("/category", (req, res) => {
 });
 
 timelinerouter.post("/allcategory", function(req, res) {
-  userschema3.find({}, function(err, resu) {
-    if (resu) {
-      let addStatusInResult = {
-        dataFromDatabase: resu,
-        status: "Category Inserted"
-      };
-      res.send(addStatusInResult);
-    } else {
-      let addStatusInResult = {
-        dataFromDatabase: resu,
-        status: "Error"
-      };
-      res.send(addStatusInResult);
-    }
-  });
+  userschema3
+    .find({})
+    .sort({ category: 1 })
+    .then(resu => {
+      if (resu) {
+        let addStatusInResult = {
+          dataFromDatabase: resu,
+          status: "Category Inserted"
+        };
+        res.send(addStatusInResult);
+      } else {
+        let addStatusInResult = {
+          dataFromDatabase: resu,
+          status: "Error"
+        };
+        res.send(addStatusInResult);
+      }
+    });
 });
 
 timelinerouter.post("/userdata", (req, res) => {

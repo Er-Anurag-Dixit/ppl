@@ -2,12 +2,23 @@ import React from "react";
 import PropTypes from "prop-types";
 import Helmet from "react-helmet";
 
-import Categories from "../shared/categories";
+import CategoryList from "../shared/categories";
 import Post from "../timeline/posts";
 import Featured from "../shared/featured";
-import Comment from "./comment";
+import PostActivityComponent from "../shared/postActivityComponent";
+import CommentsComponent from "./commentsComponent";
+
 export default function SinglePostComponent(props) {
-  const { history, PostData, likePost, uploadComment, comment } = props;
+  const {
+    history,
+    PostData,
+    likePost,
+    uploadComment,
+    comment,
+    Download,
+    imageId,
+    updatePostData
+  } = props;
   return (
     <div>
       <Helmet>
@@ -23,17 +34,35 @@ export default function SinglePostComponent(props) {
       <div className="container">
         <div className="content">
           <div className="content_rgt">
-            <Categories history={history} />
+            <CategoryList history={history} />
             <Featured />
           </div>
           <div className="content_lft">
             <ul>
-              {PostData.map((names, i) => (
-                <Post key={i} data={names} likePost={likePost} />
-              ))}
+              {PostData
+                ? PostData.map((names, i) => (
+                    <div>
+                      <Post key={i} data={names} downLoad={Download} />
+                    </div>
+                  ))
+                : null}
+              {PostData ? (
+                <PostActivityComponent
+                  onlikePost={likePost}
+                  Postdata={PostData[0]}
+                  downLoad={Download}
+                />
+              ) : null}
             </ul>
             <div className="contnt_3">
-              <ul>
+              <CommentsComponent
+                comments={comment}
+                uploadComment={uploadComment}
+                imageID={imageId}
+                noOfComments={PostData ? PostData[0].noOfComments : null}
+                updatePostData={updatePostData}
+              />
+              {/* <ul>
                 {comment.map((names, i) => (
                   <Comment key={i} comments={names} />
                 ))}
@@ -55,7 +84,7 @@ export default function SinglePostComponent(props) {
                     </form>
                   </div>
                 </li>
-              </ul>
+              </ul> */}
               <div className="view_div">
                 <a href="#">View more</a>
               </div>
@@ -72,5 +101,6 @@ SinglePostComponent.propTypes = {
   PostData: PropTypes.array,
   likePost: PropTypes.func,
   uploadComment: PropTypes.func,
-  comment: PropTypes.array
+  comment: PropTypes.array,
+  downLoad: PropTypes.func
 };

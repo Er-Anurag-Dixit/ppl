@@ -1,18 +1,19 @@
 import React from "react";
 import { connect } from "react-redux";
+// import socketIOClient from "socket.io-client";
 
 import {
-  updateCategories,
   updateLoginState,
+  updateCategories,
   resetLoginState
 } from "../redux/actions";
 import fetchData from "../shared/sharedFunctions";
-import { Routes } from "../shared/config";
+import { Routes, ServerUrl } from "../config";
 import TimelineBodyComponent from "./timelineBodyComponent";
 
 const {
-  Likes,
-  Category,
+  Likes_Post,
+  // Category,
   Upload,
   AllPosts,
   UserData,
@@ -20,159 +21,204 @@ const {
 } = Routes;
 
 const zero = 0;
-let hasMoreItems = true;
-let totalPosts = "";
-let clicked = false;
+// let clicked = false;
 let username = "";
 let emailId = "";
 let myUploads = false;
-let items = zero;
+// let endpoint = ServerUrl;
+let hasError = false;
+
+// const categoryUploadForm = function() {
+//   if (!clicked) {
+//     clicked = true;
+//     const form =
+//       "category<input type='text' name='category' required/><br /><br /><input type='submit'/> &emsp;";
+//     document.getElementById("category").innerHTML = form;
+//   } else {
+//     document.getElementById("category").innerHTML = "";
+//     clicked = false;
+//   }
+// };
+
+const userDetails = function() {
+  let UserID = { id: localStorage.getItem("userId") };
+  fetchData(UserData, UserID).then(res => {
+    if (res && res.data) username = res.data[zero]?.username;
+    emailId = res.data[zero]?.email;
+  });
+};
+
+const DownloadImage = function(image) {
+  fetch(ServerUrl + "/" + image).then(response => {
+    response.blob().then(blob => {
+      let url = window.URL.createObjectURL(blob);
+      let a = document.createElement("a");
+      a.href = url;
+      a.download = image;
+      a.click();
+    });
+  });
+};
+
+const totalNumberPosts = function() {
+  const data = { email: myUploads ? emailId : null };
+  fetchData(TotalNumberOfPosts, data).then(res => {
+    if (res) {
+      this.totalPosts = res.data?.counts;
+    }
+    new Promise(resolve => {
+      resolve = true;
+    });
+  });
+};
+
+const likePost = function(postID) {
+  let likedData = {
+    postId: postID,
+    userId: localStorage.getItem("userId")
+  };
+  fetchData(Likes_Post, likedData)
+    .then(res => {
+      if (res?.data) {
+        let likeData = res?.data?.dataFromDatabase[0];
+        for (let i = zero; i < this.state.postdata.length; i++) {
+          if (this.state.postdata[i]._id === likeData._id) {
+            let newpostData = this.state.postdata;
+            newpostData[i].likes = likeData.likes;
+            this.setState({ postdata: newpostData });
+          }
+        }
+      }
+    })
+    .catch(err => {
+      if (err.message === "Network Error") {
+        this.props.history.push("/errorpage");
+      }
+    });
+};
+
+// const setupSocket = function() {
+//   const socket = socketIOClient(endpoint);
+//   socket.on("FromAPI", data => (this.response = data));
+// };
+
+const checkIfNotlogin = function() {
+  if (!localStorage.getItem("userId")) {
+    this.props.history.push("/login");
+  }
+};
+
+// const uploadCategory = function(event) {
+//   event.preventDefault();
+//   let newCategory = event.target.category.value;
+//   const categoryToBeUploaded = { category: newCategory };
+//   fetchData(Category, categoryToBeUploaded)
+//     .then(res => {
+//       if (res && res.data && res.data.status === "Category Inserted") {
+//         let allCategory = res?.data?.dataFromDatabase?.map(data => {
+//           return data;
+//         });
+//         this.props.updateCategory(allCategory);
+//       }
+//       if (res && res.data?.status === "Already Exist") {
+//         alert("This category already exist");
+//       }
+//     })
+//     .catch(err => {
+//       if (err.message === "Network Error") {
+//         this.props.history.push("/errorpage");
+//       }
+//     });
+//   // clicked = false;
+//   document.getElementById("category").innerHTML = "";
+// };
+
+const handlePostUploadForm = function(event) {
+  event.preventDefault();
+  if (event?.target?.category?.value === "none") {
+    document.getElementById("category123").focus();
+  } else {
+    let category = event.target.category.value;
+    let file = event.target.file.files[0];
+    let caption = event.target.description.value;
+    let userName = username;
+    let userEmail = emailId;
+    const formdata = new FormData();
+    formdata.append("username", userName);
+    formdata.append("email", userEmail);
+    formdata.append("caption", caption);
+    formdata.append("category", category);
+    formdata.append("file", file);
+    fetchData(Upload, formdata).then(res => {
+      if (res && res.data?.status === "Post Inserted") {
+        this.allPost(zero);
+      } else {
+        alert("not inserted");
+      }
+      this.togglePopup();
+    });
+  }
+};
 
 class Timeline extends React.Component {
   constructor(props) {
     super(props);
+    this.response = false;
+    this.totalPosts = "";
     this.state = {
+      hasMoreItems: true,
+      postdata: [],
       showPopup: false,
-      postdata: []
-      //showPopup: false
-      //items: zero
-      // hasMoreItems: true,
-      // totalPosts: "",
-      // username: "",
-      //email: "",
-      // myUploads: false
-      // clicked: false
+      items: zero
     };
-    this.handlePostUploadForm = this.handlePostUploadForm.bind(this);
+    this.userDetails = userDetails.bind(this);
+    this.DownloadImage = DownloadImage.bind(this);
+    // this.categoryUploadForm = categoryUploadForm.bind(this);
+    this.totalNumberPosts = totalNumberPosts.bind(this);
+    this.likePost = likePost.bind(this);
+    // this.setupSocket = setupSocket.bind(this);
+    this.checkIfNotlogin = checkIfNotlogin.bind(this);
+    // this.uploadCategory = uploadCategory.bind(this);
+    this.handlePostUploadForm = handlePostUploadForm.bind(this);
+    this.totalNumberPosts();
   }
-  categoryUploadForm = () => {
-    if (!clicked) {
-      clicked = true;
-      const form =
-        "category<input type='text' name='category' required/><br /><br /><input type='submit'/> &emsp;";
-      document.getElementById("category").innerHTML = form;
-    } else {
-      document.getElementById("category").innerHTML = "";
-      clicked = false;
-    }
-  };
 
-  likePost = postID => {
-    let likedData = {
-      postId: postID,
-      userId: localStorage.getItem("userId")
-    };
-    fetchData(Likes, likedData)
-      .then(res => {
-        if (res && res.data) {
-          let likeData = res?.data?.dataFromDatabase[0];
-          for (let i = zero; i < this.state.postdata.length; i++) {
-            if (this.state.postdata[i]._id === likeData._id) {
-              let postData = this.state.postdata;
-              postData[i].likes = likeData.likes;
-              this.setState({ postdata: postData });
-            }
-          }
-        }
-      })
-      .catch(err => {
-        if (err.message === "Network Error") {
-          this.props.history.push("/errorpage");
-        }
-      });
-  };
+  static getDerivedStateFromError(error) {
+    return (hasError = true);
+  }
 
+  componentDidMount() {
+    this.checkIfNotlogin();
+    this.props.updateLoginState(localStorage.getItem("userId"));
+    // this.setupSocket();
+    this.userDetails();
+  }
   stateUpdateOnTimelineClick = async () => {
-    this.setState({
-      // myUploads: false,
-      // items: zero
-      // hasMoreItems: true
-    });
-    items = zero;
+    this.setState({ items: zero, hasMoreItems: true });
     myUploads = false;
-    hasMoreItems = true;
     await this.totalNumberPosts();
-    await this.allPost(items);
+    await this.allPost(this.state.items);
   };
-
-  uploadCategory = event => {
-    event.preventDefault();
-    let newCategory = event.target.category.value;
-    const categoryToBeUploaded = { category: newCategory };
-    fetchData(Category, categoryToBeUploaded)
-      .then(res => {
-        if (res && res.data && res.data.status === "Category Inserted") {
-          let allCategory = res?.data?.dataFromDatabase?.map(data => {
-            return data;
-          });
-          this.props.updateCategory(allCategory);
-        }
-        if (res && res.data.status === "Already Exist") {
-          alert("This category already exist");
-        }
-      })
-      .catch(err => {
-        if (err.message === "Network Error") {
-          this.props.history.push("/errorpage");
-        }
-      });
-    clicked = false;
-    document.getElementById("category").innerHTML = "";
-  };
-
-  handlePostUploadForm(event) {
-    event.preventDefault();
-    if (event.target.category.value === "none") {
-      document.getElementById("category123").focus();
-    } else {
-      let category = event.target.category.value;
-      let file = event.target.file.files[0];
-      let caption = event.target.description.value;
-      let userName = username;
-      let userEmail = emailId;
-      const formdata = new FormData();
-      formdata.append("username", userName);
-      formdata.append("email", userEmail);
-      formdata.append("caption", caption);
-      formdata.append("category", category);
-      formdata.append("file", file);
-      // Axios.post(Server.ServerUrl + Server.Routes.Upload, formdata);
-      fetchData(Upload, formdata)
-        .then(res => {
-          if (res && res.data.status === "Post Inserted") {
-            this.allPost(zero);
-          } else {
-            alert("not inserted");
-          }
-          this.togglePopup();
-        })
-        .catch(err => {
-          if (err.message === "Network Error") {
-            this.props.history.push("/errorpage");
-          }
-        });
-    }
-  }
 
   togglePopup = () => {
-    // console.log("showPopup", showPopup);
-    this.setState({
-      showPopup: !this.state.showPopup
-    });
+    this.setState({ showPopup: !this.state.showPopup });
   };
 
   loadMorePosts = () => {
-    if (items <= totalPosts) {
-      setTimeout(async () => {
-        await this.allPost(items);
-      }, 1000);
+    if (this.totalPosts) {
+      if (this.totalPosts >= this.state.items) {
+        setTimeout(async () => {
+          await this.allPost(this.state.items);
+        }, 1000);
+      } else {
+        this.setState({ hasMoreItems: false });
+      }
+      return new Promise(resolve => {
+        resolve(true);
+      });
     } else {
-      //this.setState({ hasMoreItems: false });
-      hasMoreItems = false;
+      return;
     }
-    return new Promise(resolve => {
-      resolve(true);
-    });
   };
 
   allPost = skipPosts => {
@@ -183,117 +229,62 @@ class Timeline extends React.Component {
     fetchData(AllPosts, post)
       .then(res => {
         if (res) {
-          let allPostsData = res.data.dataFromDatabase;
+          let allPostsData = res.data?.dataFromDatabase;
           if (skipPosts === zero) {
-            this.setState({
-              postdata: allPostsData
-            });
-            items = skipPosts + 5;
+            this.setState({ postdata: allPostsData, items: skipPosts + 5 });
           } else {
             this.setState({
+              items: skipPosts + 5,
               postdata: [...this.state.postdata, ...allPostsData]
             });
-            items = skipPosts + 5;
           }
         }
       })
       .catch(err => {
-        if (err.message === "Network Error") {
-          this.props.history.push("/errorpage");
-        }
+        hasError = true;
       });
   };
 
   showMyUploads = async () => {
-    this.setState({
-      // myUploads: true,
-      // hasMoreItems: true,
-    });
-    items = zero;
+    this.setState({ items: zero, hasMoreItems: true });
     myUploads = true;
-    hasMoreItems = true;
     await this.totalNumberPosts();
-    await this.allPost(items);
+    await this.allPost(this.state.items);
   };
-
-  checkNotlogin = () => {
-    if (!localStorage.getItem("userId")) {
-      this.props.history.push("/login");
-    }
-  };
-
-  userDetails = () => {
-    let UserID = { id: localStorage.getItem("userId") };
-    fetchData(UserData, UserID).then(res => {
-      username = res.data[zero].username;
-      emailId = res.data[zero].email;
-    });
-  };
-
-  totalNumberPosts = () => {
-    const data = { email: myUploads ? emailId : false };
-    fetchData(TotalNumberOfPosts, data)
-      .then(res => {
-        if (res) {
-          totalPosts = res.data.counts;
-          // return new Promise(resolve => {
-          //   resolve(true);
-          // });
-        }
-      })
-      .catch(err => {
-        if (err.message === "Network Error") {
-          this.props.history.push("/errorpage");
-        }
-      });
-  };
-
-  static getDerivedStateFromError(error) {
-    return { hasError: true };
-  }
-
-  componentWillUnmount() {
-    items = zero;
-  }
-
-  componentDidMount() {
-    this.totalNumberPosts();
-    this.userDetails();
-    this.checkNotlogin();
-    this.props.updateLoginState(localStorage.getItem("userId"));
-  }
 
   render() {
-    const {
-      hasError,
-      // hasMoreItems,
-      showPopup,
-      postdata
-      //items
-      // username
-    } = this.state;
+    const { showPopup, items, postdata, hasMoreItems } = this.state;
     if (hasError) {
-      return <div>Something went wrong</div>;
+      return (
+        <div>
+          <h1 style={{ padding: "200px 450px", color: "#f47b13" }}>
+            404 | Something went wrong
+          </h1>
+        </div>
+      );
+    } else {
+      return (
+        <div>
+          <TimelineBodyComponent
+            togglePopup={this.togglePopup.bind(this)}
+            categoryUploadForm={this.categoryUploadForm}
+            uploadCategory={this.uploadCategory}
+            username={username}
+            showMyUploads={this.showMyUploads}
+            stateUpdateOnTimelineClick={this.stateUpdateOnTimelineClick}
+            handlePostUploadForm={this.handlePostUploadForm}
+            items={items}
+            loadMorePosts={this.loadMorePosts}
+            hasMoreItems={hasMoreItems}
+            postdata={postdata}
+            likePost={this.likePost}
+            showPopup={showPopup}
+            hasError={hasError}
+            downLoad={this.DownloadImage}
+          />
+        </div>
+      );
     }
-    return (
-      <div>
-        <TimelineBodyComponent
-          togglePopup={this.togglePopup.bind(this)}
-          categoryUploadForm={this.categoryUploadForm}
-          uploadCategory={this.uploadCategory}
-          username={username}
-          showMyUploads={this.showMyUploads}
-          stateUpdateOnTimelineClick={this.stateUpdateOnTimelineClick}
-          handlePostUploadForm={this.handlePostUploadForm}
-          items={items}
-          loadMorePosts={this.loadMorePosts}
-          hasMoreItems={hasMoreItems}
-          postdata={postdata}
-          likePost={this.likePost}
-          showPopup={showPopup}
-        />
-      </div>
-    );
   }
 }
 
@@ -303,8 +294,8 @@ function mapStateToProps(state) {
 
 const mapDispatchToProps = dispatch => {
   return {
-    updateCategory: data => dispatch(updateCategories(data)),
     updateLoginState: data => dispatch(updateLoginState(data)),
+    updateCategory: data => dispatch(updateCategories(data)),
     resetLoginState: () => dispatch(resetLoginState())
   };
 };

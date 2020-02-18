@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import Helmet from "react-helmet";
 
 import WelcomeComponent from "../shared/welcomeComponent";
-import { Routes } from "../shared/config";
+import { Routes } from "../config";
 import fetchData from "../shared/sharedFunctions";
 const { Login } = Routes;
 const isLogin = () => localStorage.getItem("userId");
@@ -36,7 +36,9 @@ export default class LoginComponent extends React.Component {
       .then(res => {
         if (res?.data?.status === "logged in successfully") {
           let id = res?.data?.dataFromDatabase[0]?._id;
+          let username = res?.data?.dataFromDatabase[0]?.username;
           localStorage.setItem("userId", id);
+          localStorage.setItem("username", username);
           this.props.history.push("/timeline");
         } else if (res?.data === "wrong password") {
           this.setState({

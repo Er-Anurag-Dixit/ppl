@@ -1,7 +1,9 @@
 import React from "react";
-import { updateCategories } from "../redux/actions";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
+
+import { updateCategories } from "../redux/actions";
+
 function Popup(props) {
   const { handleSubmit, category, togglePopup } = props;
 
@@ -48,9 +50,8 @@ function Popup(props) {
                     Select an Option
                   </option>
                   ;
-                  {category.map(data => {
-                    let temp = data._id.toString();
-                    return <option key={temp}>{data.category}</option>;
+                  {category.map((data, key) => {
+                    return <option key={key}>{data.category}</option>;
                   })}
                 </select>
               </li>
@@ -78,11 +79,13 @@ function Popup(props) {
     </div>
   );
 }
+
 Popup.propTypes = {
   handleSubmit: PropTypes.func,
   category: PropTypes.array,
   togglePopup: PropTypes.func
 };
+
 function mapStateToProps(state) {
   return { category: state.CategoryReducer.category };
 }

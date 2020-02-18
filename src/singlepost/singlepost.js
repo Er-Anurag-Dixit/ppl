@@ -1,10 +1,12 @@
 import React from "react";
+import { connect } from "react-redux";
 
+import { updateLoginState } from "../redux/actions";
 import SinglePostComponent from "./singlepostcomponent";
+import { ServerUrl, Routes } from "../config";
 import fetchData from "../shared/sharedFunctions";
-import { Routes } from "../shared/config";
 
-const { Likes, AllComments, Comments, ImageData } = Routes;
+const { Likes, ImageData } = Routes;
 const zero = 0;
 
 class SinglePost extends React.Component {
@@ -14,10 +16,9 @@ class SinglePost extends React.Component {
       imageId: this.props.match.params.id,
       image: "",
       username: "",
-      noOfLikes: "",
       comment: [],
       caption: "",
-      PostData: [],
+      PostData: "",
       hasError: false
     };
   }
@@ -41,59 +42,67 @@ class SinglePost extends React.Component {
       });
   };
 
-  allComments = () => {
-    const imageId = this.state.imageId;
-    const data = {
-      imageId: imageId
-    };
-    fetchData(AllComments, data)
-      .then(res => {
-        if (res) {
-          const allCommentData = res.data.dataFromDatabase.map(data => {
-            return data;
-          });
-          this.setState({ comment: allCommentData });
-        }
-      })
-      .catch(err => {
-        if (err.message === "Network Error") {
-          this.props.history.push("/errorpage");
-        }
-      });
+  // allComments = () => {
+  //   const imageId = this.state.imageId;
+  //   const data = {
+  //     imageId: imageId
+  //   };
+  //   fetchData(AllComments, data)
+  //     .then(res => {
+  //       if (res) {
+  //         const allCommentData = res.data.dataFromDatabase.map(data => {
+  //           return data;
+  //         });
+  //         this.setState({ comment: allCommentData });
+  //       }
+  //     })
+  //     .catch(err => {
+  //       if (err.message === "Network Error") {
+  //         this.props.history.push("/errorpage");
+  //       }
+  //     });
+  // };
+
+  updatePostData = () => {
+    let postData = this.state.PostData;
+    postData[0].noOfComments = String(Number(postData[0].noOfComments) + 1);
+    this.setState({ PostData: postData });
   };
 
-  uploadComment = event => {
-    event.preventDefault();
-    let userid = localStorage.getItem("userId");
-    const commentData = {
-      imageId: this.state.imageId,
-      comment: event.target.comment.value,
-      userId: userid
-    };
-    fetchData(Comments, commentData)
-      .then(res => {
-        if (res) {
-          let comments = res.data.dataFromDatabase.map(data => {
-            return data;
-          });
-          let imageID = { id: this.state.imageId };
-          fetchData(ImageData, imageID).then(res => {
-            if (res) {
-              this.setState({
-                PostData: [res.data?.dataBase[0]],
-                comment: [...comments]
-              });
-            }
-          });
-        }
-      })
-      .catch(err => {
-        if (err.message === "Network Error") {
-          this.props.history.push("/errorpage");
-        }
-      });
-    event.target.comment.value = null;
-  };
+  // uploadComment = event => {
+  //   event.preventDefault();
+  //   let userid = localStorage?.getItem("userId");
+  //   const commentData = {
+  //     imageId: this.state?.imageId,
+  //     comment: event.target?.comment?.value,
+  //     userId: userid
+  //   };
+  //   fetchData(Comments, commentData)
+  //     .then(res => {
+  //       if (res && res.data) {
+  //         // let postData = this.state.PostData;
+  //         // postData[0].noOfComments = String(
+  //         //   Number(postData[0].noOfComments) + 1
+  //         // );
+  //         // this.setState({ PostData: postData });
+  //         // let imageID = { id: this.state?.imageId };
+  //         // fetchData(ImageData, imageID).then(res => {
+  //         //   if (res) {
+  //         //     this.setState({
+  //         //       PostData: [res?.data?.dataBase[0]],
+  //         //       comment: [...comments]
+  //         //     });
+  //         //   }
+  //         // });
+  //       }
+  //     })
+  //     .catch(err => {
+  //       if (err.message === "Network Error") {
+  //         this.props.history.push("/errorpage");
+  //       }
+  //     });
+  //   event.target.comment.value = null;
+  // };
   getImageData = () => {
     let imageID = { id: this.state.imageId };
     fetchData(ImageData, imageID)
@@ -107,7 +116,6 @@ class SinglePost extends React.Component {
           this.props.history.push("/errorpage");
         }
       });
-    this.allComments();
   };
 
   notLogin = () => {
@@ -117,14 +125,26 @@ class SinglePost extends React.Component {
   };
 
   static getDerivedStateFromError(error) {
-    // Update state so the next render will show the fallback UI.
     return { hasError: true };
   }
+
+  DownloadImage = image => {
+    fetch(ServerUrl + "/" + image).then(response => {
+      response.blob().then(blob => {
+        let url = window.URL.createObjectURL(blob);
+        let a = document.createElement("a");
+        a.href = url;
+        a.download = image;
+        a.click();
+      });
+    });
+  };
 
   componentDidMount() {
     this.notLogin();
     this.getImageData();
     window.scrollTo(0, 0);
+    this.props.updateLoginState(localStorage.getItem("userId"));
   }
   render() {
     const { hasError } = this.state;
@@ -139,9 +159,23 @@ class SinglePost extends React.Component {
           likePost={this.likePost}
           comment={this.state.comment}
           uploadComment={this.uploadComment}
+          Download={this.DownloadImage}
+          imageId={this.state.imageId}
+          updatePostData={this.updatePostData}
         />
       </div>
     );
   }
 }
-export default SinglePost;
+
+function mapStateToProps(state) {
+  return { category: state.CategoryReducer.category };
+}
+
+const mapDispatchToProps = dispatch => {
+  return {
+    updateLoginState: data => dispatch(updateLoginState(data))
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(SinglePost);

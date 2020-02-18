@@ -1,5 +1,5 @@
 module.exports = {
-  ServerUrl: "http://192.168.100.135:8083",
+  ServerUrl: "http://localhost:8083",
   Routes: {
     Login: "/login",
     Signup: "/signup",
@@ -10,9 +10,9 @@ module.exports = {
     Posts: "/timeline/posts",
     AllPosts: "/timeline/allpost",
     Upload: "/timeline/upload",
-    Category: "/timeline/category",
+    Upload_Category: "/timeline/category",
     AllCategory: "/timeline/allcategory",
-    Likes: "/timeline/like",
+    Likes_Post: "/timeline/like",
     ImageData: "/imagedata",
     UserData: "/timeline/userdata",
     TotalNumberOfPosts: "/timeline/totalPosts"
