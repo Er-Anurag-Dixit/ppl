@@ -4,7 +4,7 @@ import { connect } from "react-redux";
 import { updateLoginState } from "../redux/actions";
 import SinglePostComponent from "./singlepostcomponent";
 import { ServerUrl, Routes } from "../config";
-import fetchData from "../shared/sharedFunctions";
+import serverCall, { ErrorMessage } from "../shared/sharedFunctions";
 
 const { Likes, ImageData } = Routes;
 const zero = 0;
@@ -18,8 +18,8 @@ class SinglePost extends React.Component {
       username: "",
       comment: [],
       caption: "",
-      PostData: "",
-      hasError: false
+      PostData: ""
+      // hasError: false
     };
   }
   likePost = postID => {
@@ -27,19 +27,13 @@ class SinglePost extends React.Component {
       postId: postID,
       userId: localStorage.getItem("userId")
     };
-    fetchData(Likes, likedData)
-      .then(res => {
-        if (res) {
-          let PostDataOnLike = this.state.PostData;
-          PostDataOnLike[zero].likes = res.data.dataFromDatabase[zero].likes;
-          this.setState({ PostData: PostDataOnLike });
-        }
-      })
-      .catch(err => {
-        if (err.message === "Network Error") {
-          this.props.history.push("/errorpage");
-        }
-      });
+    serverCall(Likes, likedData).then(res => {
+      if (res) {
+        let PostDataOnLike = this.state.PostData;
+        PostDataOnLike[zero].likes = res.data.dataFromDatabase[zero].likes;
+        this.setState({ PostData: PostDataOnLike });
+      }
+    });
   };
 
   // allComments = () => {
@@ -47,7 +41,7 @@ class SinglePost extends React.Component {
   //   const data = {
   //     imageId: imageId
   //   };
-  //   fetchData(AllComments, data)
+  //   serverCall(AllComments, data)
   //     .then(res => {
   //       if (res) {
   //         const allCommentData = res.data.dataFromDatabase.map(data => {
@@ -77,7 +71,7 @@ class SinglePost extends React.Component {
   //     comment: event.target?.comment?.value,
   //     userId: userid
   //   };
-  //   fetchData(Comments, commentData)
+  //   serverCall(Comments, commentData)
   //     .then(res => {
   //       if (res && res.data) {
   //         // let postData = this.state.PostData;
@@ -86,7 +80,7 @@ class SinglePost extends React.Component {
   //         // );
   //         // this.setState({ PostData: postData });
   //         // let imageID = { id: this.state?.imageId };
-  //         // fetchData(ImageData, imageID).then(res => {
+  //         // serverCall(ImageData, imageID).then(res => {
   //         //   if (res) {
   //         //     this.setState({
   //         //       PostData: [res?.data?.dataBase[0]],
@@ -105,7 +99,7 @@ class SinglePost extends React.Component {
   // };
   getImageData = () => {
     let imageID = { id: this.state.imageId };
-    fetchData(ImageData, imageID)
+    serverCall(ImageData, imageID)
       .then(res => {
         if (res) {
           this.setState({ PostData: [res.data.dataBase[0]] });
@@ -123,10 +117,6 @@ class SinglePost extends React.Component {
       this.props.history.push("/login");
     }
   };
-
-  static getDerivedStateFromError(error) {
-    return { hasError: true };
-  }
 
   DownloadImage = image => {
     fetch(ServerUrl + "/" + image).then(response => {
@@ -147,10 +137,6 @@ class SinglePost extends React.Component {
     this.props.updateLoginState(localStorage.getItem("userId"));
   }
   render() {
-    const { hasError } = this.state;
-    if (hasError) {
-      return <div>Something went wrong</div>;
-    }
     return (
       <div>
         <SinglePostComponent

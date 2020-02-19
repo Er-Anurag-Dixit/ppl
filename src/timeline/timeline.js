@@ -7,7 +7,8 @@ import {
   updateCategories,
   resetLoginState
 } from "../redux/actions";
-import fetchData from "../shared/sharedFunctions";
+import serverCall from "../shared/sharedFunctions";
+import { ErrorMessage } from "../shared/sharedFunctions";
 import { Routes, ServerUrl } from "../config";
 import TimelineBodyComponent from "./timelineBodyComponent";
 
@@ -42,7 +43,7 @@ let hasError = false;
 
 const userDetails = function() {
   let UserID = { id: localStorage.getItem("userId") };
-  fetchData(UserData, UserID).then(res => {
+  serverCall(UserData, UserID).then(res => {
     if (res && res.data) username = res.data[zero]?.username;
     emailId = res.data[zero]?.email;
   });
@@ -60,15 +61,13 @@ const DownloadImage = function(image) {
   });
 };
 
-const totalNumberPosts = function() {
+const totalNumberPosts = async function() {
   const data = { email: myUploads ? emailId : null };
-  fetchData(TotalNumberOfPosts, data).then(res => {
-    if (res) {
-      this.totalPosts = res.data?.counts;
+  serverCall(TotalNumberOfPosts, data).then(res => {
+    if (res && res.data) {
+      this.setState({ totalPosts: res.data?.counts });
+      // this.totalPosts = res.data?.counts;
     }
-    new Promise(resolve => {
-      resolve = true;
-    });
   });
 };
 
@@ -77,24 +76,18 @@ const likePost = function(postID) {
     postId: postID,
     userId: localStorage.getItem("userId")
   };
-  fetchData(Likes_Post, likedData)
-    .then(res => {
-      if (res?.data) {
-        let likeData = res?.data?.dataFromDatabase[0];
-        for (let i = zero; i < this.state.postdata.length; i++) {
-          if (this.state.postdata[i]._id === likeData._id) {
-            let newpostData = this.state.postdata;
-            newpostData[i].likes = likeData.likes;
-            this.setState({ postdata: newpostData });
-          }
+  serverCall(Likes_Post, likedData).then(res => {
+    if (res?.data) {
+      let likeData = res?.data?.dataFromDatabase[0];
+      for (let i = zero; i < this.state.postdata.length; i++) {
+        if (this.state.postdata[i]._id === likeData._id) {
+          let newpostData = this.state.postdata;
+          newpostData[i].likes = likeData.likes;
+          this.setState({ postdata: newpostData });
         }
       }
-    })
-    .catch(err => {
-      if (err.message === "Network Error") {
-        this.props.history.push("/errorpage");
-      }
-    });
+    }
+  });
 };
 
 // const setupSocket = function() {
@@ -112,7 +105,7 @@ const checkIfNotlogin = function() {
 //   event.preventDefault();
 //   let newCategory = event.target.category.value;
 //   const categoryToBeUploaded = { category: newCategory };
-//   fetchData(Category, categoryToBeUploaded)
+//   serverCall(Category, categoryToBeUploaded)
 //     .then(res => {
 //       if (res && res.data && res.data.status === "Category Inserted") {
 //         let allCategory = res?.data?.dataFromDatabase?.map(data => {
@@ -149,7 +142,7 @@ const handlePostUploadForm = function(event) {
     formdata.append("caption", caption);
     formdata.append("category", category);
     formdata.append("file", file);
-    fetchData(Upload, formdata).then(res => {
+    serverCall(Upload, formdata).then(res => {
       if (res && res.data?.status === "Post Inserted") {
         this.allPost(zero);
       } else {
@@ -164,27 +157,24 @@ class Timeline extends React.Component {
   constructor(props) {
     super(props);
     this.response = false;
-    this.totalPosts = "";
+
     this.state = {
       hasMoreItems: true,
       postdata: [],
       showPopup: false,
-      items: zero
+      items: zero,
+      totalPosts: 0
     };
     this.userDetails = userDetails.bind(this);
     this.DownloadImage = DownloadImage.bind(this);
-    // this.categoryUploadForm = categoryUploadForm.bind(this);
     this.totalNumberPosts = totalNumberPosts.bind(this);
     this.likePost = likePost.bind(this);
-    // this.setupSocket = setupSocket.bind(this);
     this.checkIfNotlogin = checkIfNotlogin.bind(this);
-    // this.uploadCategory = uploadCategory.bind(this);
     this.handlePostUploadForm = handlePostUploadForm.bind(this);
     this.totalNumberPosts();
-  }
-
-  static getDerivedStateFromError(error) {
-    return (hasError = true);
+    // this.setupSocket = setupSocket.bind(this);
+    // this.uploadCategory = uploadCategory.bind(this);
+    // this.categoryUploadForm = categoryUploadForm.bind(this);
   }
 
   componentDidMount() {
@@ -205,8 +195,8 @@ class Timeline extends React.Component {
   };
 
   loadMorePosts = () => {
-    if (this.totalPosts) {
-      if (this.totalPosts >= this.state.items) {
+    if (this.state.totalPosts) {
+      if (this.state.totalPosts >= this.state.items) {
         setTimeout(async () => {
           await this.allPost(this.state.items);
         }, 1000);
@@ -226,23 +216,19 @@ class Timeline extends React.Component {
       Skip: skipPosts,
       email: myUploads ? emailId : false
     };
-    fetchData(AllPosts, post)
-      .then(res => {
-        if (res) {
-          let allPostsData = res.data?.dataFromDatabase;
-          if (skipPosts === zero) {
-            this.setState({ postdata: allPostsData, items: skipPosts + 5 });
-          } else {
-            this.setState({
-              items: skipPosts + 5,
-              postdata: [...this.state.postdata, ...allPostsData]
-            });
-          }
+    serverCall(AllPosts, post).then(res => {
+      if (res) {
+        let allPostsData = res.data?.dataFromDatabase;
+        if (skipPosts === zero) {
+          this.setState({ postdata: allPostsData, items: skipPosts + 5 });
+        } else {
+          this.setState({
+            items: skipPosts + 5,
+            postdata: [...this.state.postdata, ...allPostsData]
+          });
         }
-      })
-      .catch(err => {
-        hasError = true;
-      });
+      }
+    });
   };
 
   showMyUploads = async () => {
@@ -255,20 +241,14 @@ class Timeline extends React.Component {
   render() {
     const { showPopup, items, postdata, hasMoreItems } = this.state;
     if (hasError) {
-      return (
-        <div>
-          <h1 style={{ padding: "200px 450px", color: "#f47b13" }}>
-            404 | Something went wrong
-          </h1>
-        </div>
-      );
+      ErrorMessage();
     } else {
       return (
         <div>
           <TimelineBodyComponent
             togglePopup={this.togglePopup.bind(this)}
-            categoryUploadForm={this.categoryUploadForm}
-            uploadCategory={this.uploadCategory}
+            // categoryUploadForm={this.categoryUploadForm}
+            // uploadCategory={this.uploadCategory}
             username={username}
             showMyUploads={this.showMyUploads}
             stateUpdateOnTimelineClick={this.stateUpdateOnTimelineClick}

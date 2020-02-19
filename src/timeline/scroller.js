@@ -3,6 +3,8 @@ import Post from "./posts";
 import InfiniteScroll from "react-infinite-scroller";
 import PostActivityComponent from "../shared/postActivityComponent";
 
+let k = 0;
+
 const Scroller = props => {
   const { hasMoreItems, postdata, onlikePost, downLoad, loadMorePosts } = props;
   return (
@@ -11,7 +13,7 @@ const Scroller = props => {
       loadMore={loadMorePosts}
       loader={
         hasMoreItems ? (
-          <div className="loader" key={0} style={{ marginLeft: "300px" }}>
+          <div className="loader" key={k++} style={{ marginLeft: "300px" }}>
             {" "}
             <img
               src="images/giphy.gif"
@@ -27,13 +29,8 @@ const Scroller = props => {
     >
       <ul>
         {postdata.map((post, i) => (
-          <div>
-            <Post
-              key={i}
-              data={post}
-              onlikePost={onlikePost}
-              downLoad={downLoad}
-            />
+          <div key={i}>
+            <Post data={post} onlikePost={onlikePost} downLoad={downLoad} />
             <PostActivityComponent
               onlikePost={onlikePost}
               Postdata={post}

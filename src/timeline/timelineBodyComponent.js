@@ -12,13 +12,15 @@ import Featured from "../shared/featured";
 import UserProfileComponent from "./userProfileComponent";
 // import CategoryList from "../shared/categories";
 import Scroller from "./scroller";
-import fetchData from "../shared/sharedFunctions";
+import serverCall from "../shared/sharedFunctions";
 // import CategoryForm from "../shared/categoryForm";
 import CategoryComponent from "../shared/CategoryComponent";
 import { updateCategories } from "../redux/actions";
 import { Routes } from "../config";
 
 const { Upload_Category } = Routes;
+
+let k = 0;
 
 const TimelineBodyComponent = props => {
   // const getPost = ({ index, style }) => {
@@ -66,7 +68,7 @@ const TimelineBodyComponent = props => {
     } else {
       const newCategory = event.target.category.value;
       const categoryToBeUploaded = { category: newCategory };
-      fetchData(Upload_Category, categoryToBeUploaded).then(res => {
+      serverCall(Upload_Category, categoryToBeUploaded).then(res => {
         if (res && res.data && res.data.status === "Category Inserted") {
           let allCategory = res?.data?.dataFromDatabase?.map(data => {
             return data;
@@ -95,7 +97,12 @@ const TimelineBodyComponent = props => {
     downLoad
   } = props;
   if (hasError) {
-    return <div>Something is wrong</div>;
+    return (
+      <div>
+        <h1></h1>
+        Something is wrong
+      </div>
+    );
   }
   return (
     <div>
@@ -130,33 +137,31 @@ const TimelineBodyComponent = props => {
                 />
               ) : null}
             </div>
-            {/*<div> 
-            <InfiniteLoader
-                  isItemLoaded={() => {
-                    return !hasMoreItems;
-                  }}
-                  style={{ width: "100" }}
-                  itemCount={10}
-                  loadMoreItems={() => {
-                    loadMorePosts();
-                  }}
-                >
-                  {({ onItemsRendered, ref }) => (
-                    <FixedSizeList
-                      height={3000}
-                      width={750}
-                      itemCount={10}
-                      itemSize={650}
-                      onItemsRendered={onItemsRendered}
-                      ref={ref}
-                    >
-                      {getPost}
-                    </FixedSizeList>
-                  )}
-                </InfiniteLoader> 
-               </div>
-               */}
+            {/* <InfiniteLoader 
+                   isItemLoaded={() => {
+                     return !hasMoreItems;
+                   }}
+                   style={{ width: "100" }}
+                   itemCount={10}
+                   loadMoreItems={() => {
+                     loadMorePosts();
+                   }}
+                 >
+                   {({ onItemsRendered, ref }) => (
+                     <FixedSizeList
+                       height={3000}
+                       width={750}
+                     itemCount={10}
+                     itemSize={650}
+                     onItemsRendered={onItemsRendered}
+                       ref={ref}
+                     >
+                       {getPost}
+                     </FixedSizeList>
+                   )}
+                </InfiniteLoader>  */}
             <Scroller
+              key={k++}
               onlikePost={likePost}
               postdata={postdata}
               downLoad={downLoad}
@@ -169,6 +174,7 @@ const TimelineBodyComponent = props => {
     </div>
   );
 };
+
 TimelineBodyComponent.propTypes = {
   logout: PropTypes.func,
   togglePopup: PropTypes.func,
@@ -189,11 +195,13 @@ TimelineBodyComponent.propTypes = {
 function mapStateToProps(state) {
   return { category: state.CategoryReducer.category };
 }
+
 const mapDispatchToProps = dispatch => {
   return {
     updateCategory: data => dispatch(updateCategories(data))
   };
 };
+
 export default connect(
   mapStateToProps,
   mapDispatchToProps

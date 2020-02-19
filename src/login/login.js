@@ -16,8 +16,6 @@ const onLoginSubmit = function(event) {
   };
 
   this.login(loginData);
-  // let refOfEmail = event.target.email;
-  // let refOfPassword = event.target.password;
 };
 
 export default class LoginComponent extends React.Component {
@@ -32,33 +30,27 @@ export default class LoginComponent extends React.Component {
     this.onLoginSubmit = onLoginSubmit.bind(this);
   }
   login = loginData => {
-    fetchData(Login, loginData)
-      .then(res => {
-        if (res?.data?.status === "logged in successfully") {
-          let id = res?.data?.dataFromDatabase[0]?._id;
-          let username = res?.data?.dataFromDatabase[0]?.username;
-          localStorage.setItem("userId", id);
-          localStorage.setItem("username", username);
-          this.props.history.push("/timeline");
-        } else if (res?.data === "wrong password") {
-          this.setState({
-            wrongEmail: "",
-            wrongPassword: "Wrong Password",
-            status: "Please try again"
-          });
-        } else {
-          this.setState({
-            status: "Please try again",
-            wrongPassword: "",
-            wrongEmail: "Email-Id does not exist"
-          });
-        }
-      })
-      .catch(err => {
-        if (err.message === "Network Error") {
-          this.props.history.push("/errorpage");
-        }
-      });
+    fetchData(Login, loginData).then(res => {
+      if (res?.data?.status === "logged in successfully") {
+        let id = res?.data?.dataFromDatabase[0]?._id;
+        let username = res?.data?.dataFromDatabase[0]?.username;
+        localStorage.setItem("userId", id);
+        localStorage.setItem("username", username);
+        this.props.history.push("/timeline");
+      } else if (res?.data === "wrong password") {
+        this.setState({
+          wrongEmail: "",
+          wrongPassword: "Wrong Password",
+          status: "Please try again"
+        });
+      } else {
+        this.setState({
+          status: "Please try again",
+          wrongPassword: "",
+          wrongEmail: "Email-Id does not exist"
+        });
+      }
+    });
   };
 
   static getDerivedStateFromError(error) {

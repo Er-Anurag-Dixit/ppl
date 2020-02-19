@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import Helmet from "react-helmet";
@@ -7,18 +7,15 @@ import Server from "../config";
 import SignupForm from "./signupForm";
 import WelcomeComponent from "../shared/welcomeComponent";
 
-class Signup extends React.Component {
-  constructor() {
-    super();
-    this.state = {
-      heading: "Create an account",
-      status: "",
-      hasError: false
-    };
-    this.submitFunction = this.submitFunction.bind(this);
-  }
+const Signup = props => {
+  const [heading, setHeading] = useState("Create an account");
+  const [status, setStatus] = useState(null);
 
-  submitFunction(event) {
+  useEffect(() => {
+    isLogin();
+  }, []);
+
+  const submitFunction = event => {
     event.preventDefault();
     let signupData = {
       username: event.target.username.value,
@@ -32,67 +29,44 @@ class Signup extends React.Component {
       .post(Server.ServerUrl + Server.Routes.Signup, signupData)
       .then(res => {
         if (res && res.data === "Email already exist") {
-          this.setState({ status: "Email already Exist" });
+          setStatus("Email already Exist");
           {
             document.getElementById("input").focus();
           }
           eventTarget.email.value = null;
-          // this.setState({status: res.data})
         } else {
-          this.setState({ heading: "SignUp Successfull" });
-          this.props.history.push("/login");
-        }
-      })
-      .catch(err => {
-        if (err.message === "Network Error") {
-          this.props.history.push("/errorpage");
+          setHeading("SignUp Successfull");
+          props.history.push("/login");
         }
       });
-  }
-  isLogin = () => {
+  };
+  const isLogin = () => {
     if (localStorage.getItem("userId")) {
-      this.props.history.push("/timeline");
+      props.history.push("/timeline");
     }
   };
 
-  static getDerivedStateFromError(error) {
-    return { hasError: true };
-  }
-
-  componentDidMount() {
-    this.isLogin();
-  }
-
-  render() {
-    const { hasError, heading, status } = this.state;
-    if (hasError) {
-      return <div>Something Went Wrong</div>;
-    }
-    return (
-      <div>
-        <Helmet>
-          <title>Sign Up</title>
-        </Helmet>
-        <div className="container">
-          <div className="content">
-            <div className="content_rgt">
-              <div className="register_sec">
-                <h1>{heading}</h1>
-                <SignupForm
-                  submitFunction={this.submitFunction}
-                  status={status}
-                />
-                <div className="addtnal_acnt">
-                  I already have an account.
-                  <Link to="/login">Login My Account !</Link>
-                </div>
+  return (
+    <div>
+      <Helmet>
+        <title>Sign Up</title>
+      </Helmet>
+      <div className="container">
+        <div className="content">
+          <div className="content_rgt">
+            <div className="register_sec">
+              <h1>{heading}</h1>
+              <SignupForm submitFunction={submitFunction} status={status} />
+              <div className="addtnal_acnt">
+                I already have an account.
+                <Link to="/login">Login My Account !</Link>
               </div>
             </div>
-            <WelcomeComponent />
           </div>
+          <WelcomeComponent />
         </div>
       </div>
-    );
-  }
-}
+    </div>
+  );
+};
 export default Signup;

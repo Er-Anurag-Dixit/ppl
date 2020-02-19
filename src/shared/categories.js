@@ -5,7 +5,7 @@ import PropTypes from "prop-types";
 import { updateCategories } from "../redux/actions";
 import Category from "./category";
 import { Routes } from "../config";
-import fetchData from "../shared/sharedFunctions";
+import serverCall from "../shared/sharedFunctions";
 
 const { AllCategory } = Routes;
 
@@ -15,7 +15,7 @@ const { AllCategory } = Routes;
 //   }
 
 //   allcategories = () => {
-//     fetchData(AllCategory)
+//     serverCall(AllCategory)
 //       .then(res => {
 //         if (res && res.data) {
 //           let allCategoryData = res.data?.dataFromDatabase?.map(category => {
@@ -67,7 +67,7 @@ const { AllCategory } = Routes;
 
 const CategoryList = React.memo(props => {
   const allcategories = () => {
-    fetchData(AllCategory).then(res => {
+    serverCall(AllCategory).then(res => {
       if (res && res.data) {
         let allCategoryData = res.data?.dataFromDatabase?.map(category => {
           return category;

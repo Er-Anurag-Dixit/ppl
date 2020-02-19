@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
 
 import Comment from "./comment";
-import fetchData from "../shared/sharedFunctions";
+import serverCall from "../shared/sharedFunctions";
 import { Routes } from "../config";
 
 const { AllComments, Comments } = Routes;
+
 const CommentsComponent = React.memo(props => {
   const { imageID, noOfComments, updatePostData } = props;
-
   const [comment, setComment] = useState(props.comments);
 
   useEffect(() => {
@@ -18,7 +18,7 @@ const CommentsComponent = React.memo(props => {
     const data = {
       imageId: imageID
     };
-    fetchData(AllComments, data).then(res => {
+    serverCall(AllComments, data).then(res => {
       if (res && res.data) {
         const allCommentData = res.data.dataFromDatabase?.map(data => {
           return data;
@@ -36,7 +36,7 @@ const CommentsComponent = React.memo(props => {
       comment: event.target?.comment?.value,
       userId: userid
     };
-    fetchData(Comments, commentData)
+    serverCall(Comments, commentData)
       .then(res => {
         if (res && res.data) {
           updatePostData();
