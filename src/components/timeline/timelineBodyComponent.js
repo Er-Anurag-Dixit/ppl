@@ -16,9 +16,9 @@ import serverCall from "../../utilsFolder/utils";
 // import CategoryForm from "../shared/categoryForm";
 import CategoryComponent from "../shared/CategoryComponent";
 import { updateCategories } from "../../redux/actions";
-import { Routes } from "../../config";
 import { WatchEveryCategoryUpdate } from "../../redux/saga.js";
 import store from "../../redux/store.js";
+import { Routes } from "../../config";
 
 const { Upload_Category, Upload } = Routes;
 
@@ -78,7 +78,7 @@ const TimelineBodyComponent = props => {
             return data;
           });
 
-          this.props.updateCategory(allCategory);
+          props.updateCategory(allCategory);
         }
       });
       setClicked(false);

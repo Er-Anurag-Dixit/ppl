@@ -24,10 +24,6 @@ const SinglePost = props => {
   // }
 
   const [imageId, setImageId] = useState(props.match.params.id);
-  // const [image, setImage] = useState("");
-  // const [username, setUsername] = useState("");
-  // const [comment, setComment] = useState([]);
-  // const [caption, setCaption] = useState("");
   const [PostData, setPostData] = useState([]);
 
   const likePost = postID => {
@@ -51,11 +47,12 @@ const SinglePost = props => {
   };
 
   useEffect(() => {
-    // notLogin();
+    notLogin();
     getImageData();
     window.scrollTo(0, 0);
     props.updateLoginState(localStorage.getItem("userId"));
   }, []);
+
   useEffect(() => {}, [PostData, likePost]);
 
   const getImageData = () => {
