@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { connect } from "react-redux";
 
 import { updateLoginState } from "../redux/actions";
@@ -9,100 +9,61 @@ import serverCall, { DownloadImage } from "../utilsFolder/utils";
 const { Likes_Post, ImageData } = Routes;
 const zero = 0;
 
-class SinglePost extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      imageId: this.props.match.params.id,
-      image: "",
-      username: "",
-      comment: [],
-      caption: "",
-      PostData: []
-      // hasError: false
-    };
-  }
-  likePost = postID => {
+const SinglePost = props => {
+  // constructor(props) {
+  //   super(props);
+  //   this.state = {
+  //     imageId: this.props.match.params.id,
+  //     image: "",
+  //     username: "",
+  //     comment: [],
+  //     caption: "",
+  //     PostData: []
+  //     // hasError: false
+  //   };
+  // }
+
+  const [imageId, setImageId] = useState(props.match.params.id);
+  // const [image, setImage] = useState("");
+  // const [username, setUsername] = useState("");
+  // const [comment, setComment] = useState([]);
+  // const [caption, setCaption] = useState("");
+  const [PostData, setPostData] = useState([]);
+
+  const likePost = postID => {
     let likedData = {
       postId: postID,
       userId: localStorage.getItem("userId")
     };
     serverCall(Likes_Post, likedData).then(res => {
       if (res) {
-        let PostDataOnLike = this.state.PostData;
+        let PostDataOnLike = PostData;
         PostDataOnLike[zero].likes = res.data.dataFromDatabase[zero].likes;
-        this.setState({ PostData: PostDataOnLike });
+        setPostData([...PostDataOnLike]);
       }
     });
   };
 
-  // allComments = () => {
-  //   const imageId = this.state.imageId;
-  //   const data = {
-  //     imageId: imageId
-  //   };
-  //   serverCall(AllComments, data)
-  //     .then(res => {
-  //       if (res) {
-  //         const allCommentData = res.data.dataFromDatabase.map(data => {
-  //           return data;
-  //         });
-  //         this.setState({ comment: allCommentData });
-  //       }
-  //     })
-  //     .catch(err => {
-  //       if (err.message === "Network Error") {
-  //         this.props.history.push("/errorpage");
-  //       }
-  //     });
-  // };
-
-  updatePostData = () => {
-    let postData = this.state.PostData;
+  const updatePostData = () => {
+    let postData = PostData;
     postData[0].noOfComments = String(Number(postData[0].noOfComments) + 1);
-    this.setState({ PostData: postData });
+    setPostData([...postData]);
   };
 
-  // uploadComment = event => {
-  //   event.preventDefault();
-  //   let userid = localStorage?.getItem("userId");
-  //   const commentData = {
-  //     imageId: this.state?.imageId,
-  //     comment: event.target?.comment?.value,
-  //     userId: userid
-  //   };
-  //   serverCall(Comments, commentData)
-  //     .then(res => {
-  //       if (res && res.data) {
-  //         // let postData = this.state.PostData;
-  //         // postData[0].noOfComments = String(
-  //         //   Number(postData[0].noOfComments) + 1
-  //         // );
-  //         // this.setState({ PostData: postData });
-  //         // let imageID = { id: this.state?.imageId };
-  //         // serverCall(ImageData, imageID).then(res => {
-  //         //   if (res) {
-  //         //     this.setState({
-  //         //       PostData: [res?.data?.dataBase[0]],
-  //         //       comment: [...comments]
-  //         //     });
-  //         //   }
-  //         // });
-  //       }
-  //     })
-  //     .catch(err => {
-  //       if (err.message === "Network Error") {
-  //         this.props.history.push("/errorpage");
-  //       }
-  //     });
-  //   event.target.comment.value = null;
-  // };
-  getImageData = () => {
-    let imageID = { id: this.state.imageId };
+  useEffect(() => {
+    // notLogin();
+    getImageData();
+    window.scrollTo(0, 0);
+    props.updateLoginState(localStorage.getItem("userId"));
+  }, []);
+  useEffect(() => {}, [PostData, likePost]);
+
+  const getImageData = () => {
+    let imageID = { id: imageId };
     serverCall(ImageData, imageID)
       .then(res => {
         if (res) {
-          this.setState({ PostData: [res.data.dataBase[0]] });
+          setPostData([res.data.dataBase[0]]);
         }
       })
       .catch(err => {
@@ -112,35 +73,27 @@ class SinglePost extends React.Component {
       });
   };
 
-  notLogin = () => {
+  const notLogin = () => {
     if (!localStorage.getItem("userId")) {
       this.props.history.push("/login");
     }
   };
 
-  componentDidMount() {
-    this.notLogin();
-    this.getImageData();
-    window.scrollTo(0, 0);
-    this.props.updateLoginState(localStorage.getItem("userId"));
-  }
-  render() {
-    return (
-      <div>
-        <SinglePostComponent
-          history={this.props.history}
-          PostData={this.state.PostData}
-          likePost={this.likePost}
-          comment={this.state.comment}
-          uploadComment={this.uploadComment}
-          Download={DownloadImage}
-          imageId={this.state.imageId}
-          updatePostData={this.updatePostData}
-        />
-      </div>
-    );
-  }
-}
+  return (
+    <div>
+      <SinglePostComponent
+        history={props.history}
+        PostData={PostData}
+        likePost={likePost}
+        // comment={comment}
+        // uploadComment={uploadComment}
+        Download={DownloadImage}
+        imageId={imageId}
+        updatePostData={updatePostData}
+      />
+    </div>
+  );
+};
 
 function mapStateToProps(state) {
   return { category: state.CategoryReducer.category };

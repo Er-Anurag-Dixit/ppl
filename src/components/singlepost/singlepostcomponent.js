@@ -8,13 +8,11 @@ import Featured from "../shared/featured";
 import PostActivityComponent from "../shared/postActivityComponent";
 import CommentsComponent from "./commentsComponent";
 
-const SinglePostComponent = React.memo(props => {
+const SinglePostComponent = props => {
   const {
     history,
     PostData,
     likePost,
-    uploadComment,
-    comment,
     Download,
     imageId,
     updatePostData
@@ -55,8 +53,8 @@ const SinglePostComponent = React.memo(props => {
             </ul>
             <div className="contnt_3">
               <CommentsComponent
-                comments={comment}
-                uploadComment={uploadComment}
+                // comments={comment}
+                // uploadComment={uploadComment}
                 imageID={imageId}
                 noOfComments={PostData.length ? PostData[0].noOfComments : null}
                 updatePostData={updatePostData}
@@ -71,7 +69,7 @@ const SinglePostComponent = React.memo(props => {
       </div>
     </div>
   );
-});
+};
 SinglePostComponent.propTypes = {
   history: PropTypes.object,
   PostData: PropTypes.array,

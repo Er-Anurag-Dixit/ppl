@@ -12,7 +12,7 @@ const CommentsComponent = React.memo(props => {
 
   useEffect(() => {
     allComments();
-  }, [setComment, noOfComments]);
+  }, [setComment, noOfComments, comment]);
 
   const allComments = () => {
     const data = {
