@@ -13,4 +13,16 @@ export const ErrorMessage = () => {
   );
 };
 
+export const DownloadImage = function(image) {
+  return fetch(ServerUrl + "/" + image).then(response => {
+    response.blob().then(blob => {
+      let url = window.URL.createObjectURL(blob);
+      let a = document.createElement("a");
+      a.href = url;
+      a.download = image;
+      a.click();
+    });
+  });
+};
+
 export default serverCall;

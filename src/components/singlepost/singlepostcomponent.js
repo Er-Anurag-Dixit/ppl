@@ -8,7 +8,7 @@ import Featured from "../shared/featured";
 import PostActivityComponent from "../shared/postActivityComponent";
 import CommentsComponent from "./commentsComponent";
 
-export default function SinglePostComponent(props) {
+const SinglePostComponent = React.memo(props => {
   const {
     history,
     PostData,
@@ -30,7 +30,6 @@ export default function SinglePostComponent(props) {
         rel="stylesheet"
         type="text/css"
       />
-
       <div className="container">
         <div className="content">
           <div className="content_rgt">
@@ -41,12 +40,12 @@ export default function SinglePostComponent(props) {
             <ul>
               {PostData
                 ? PostData.map((names, i) => (
-                    <div>
+                    <div key={i}>
                       <Post key={i} data={names} downLoad={Download} />
                     </div>
                   ))
                 : null}
-              {PostData ? (
+              {PostData.length ? (
                 <PostActivityComponent
                   onlikePost={likePost}
                   Postdata={PostData[0]}
@@ -59,32 +58,9 @@ export default function SinglePostComponent(props) {
                 comments={comment}
                 uploadComment={uploadComment}
                 imageID={imageId}
-                noOfComments={PostData ? PostData[0].noOfComments : null}
+                noOfComments={PostData.length ? PostData[0].noOfComments : null}
                 updatePostData={updatePostData}
               />
-              {/* <ul>
-                {comment.map((names, i) => (
-                  <Comment key={i} comments={names} />
-                ))}
-                <li>
-                  <div className="cmnt_div1">
-                    <form onSubmit={uploadComment}>
-                      <input
-                        type="text"
-                        placeholder="Enter your Comment"
-                        className="cmnt_bx1"
-                        name="comment"
-                        required
-                      />
-                      <input
-                        type="submit"
-                        className="sub_bttn1"
-                        defaultValue="Submit Comment"
-                      />
-                    </form>
-                  </div>
-                </li>
-              </ul> */}
               <div className="view_div">
                 <a href="#">View more</a>
               </div>
@@ -95,7 +71,7 @@ export default function SinglePostComponent(props) {
       </div>
     </div>
   );
-}
+});
 SinglePostComponent.propTypes = {
   history: PropTypes.object,
   PostData: PropTypes.array,
@@ -104,3 +80,5 @@ SinglePostComponent.propTypes = {
   comment: PropTypes.array,
   downLoad: PropTypes.func
 };
+
+export default SinglePostComponent;

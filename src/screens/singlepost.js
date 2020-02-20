@@ -2,11 +2,11 @@ import React from "react";
 import { connect } from "react-redux";
 
 import { updateLoginState } from "../redux/actions";
-import SinglePostComponent from "./singlepostcomponent";
+import SinglePostComponent from "../components/singlepost/singlepostcomponent";
 import { ServerUrl, Routes } from "../config";
-import serverCall, { ErrorMessage } from "../shared/sharedFunctions";
+import serverCall, { DownloadImage } from "../utilsFolder/utils";
 
-const { Likes, ImageData } = Routes;
+const { Likes_Post, ImageData } = Routes;
 const zero = 0;
 
 class SinglePost extends React.Component {
@@ -18,7 +18,7 @@ class SinglePost extends React.Component {
       username: "",
       comment: [],
       caption: "",
-      PostData: ""
+      PostData: []
       // hasError: false
     };
   }
@@ -27,7 +27,7 @@ class SinglePost extends React.Component {
       postId: postID,
       userId: localStorage.getItem("userId")
     };
-    serverCall(Likes, likedData).then(res => {
+    serverCall(Likes_Post, likedData).then(res => {
       if (res) {
         let PostDataOnLike = this.state.PostData;
         PostDataOnLike[zero].likes = res.data.dataFromDatabase[zero].likes;
@@ -118,18 +118,6 @@ class SinglePost extends React.Component {
     }
   };
 
-  DownloadImage = image => {
-    fetch(ServerUrl + "/" + image).then(response => {
-      response.blob().then(blob => {
-        let url = window.URL.createObjectURL(blob);
-        let a = document.createElement("a");
-        a.href = url;
-        a.download = image;
-        a.click();
-      });
-    });
-  };
-
   componentDidMount() {
     this.notLogin();
     this.getImageData();
@@ -145,7 +133,7 @@ class SinglePost extends React.Component {
           likePost={this.likePost}
           comment={this.state.comment}
           uploadComment={this.uploadComment}
-          Download={this.DownloadImage}
+          Download={DownloadImage}
           imageId={this.state.imageId}
           updatePostData={this.updatePostData}
         />

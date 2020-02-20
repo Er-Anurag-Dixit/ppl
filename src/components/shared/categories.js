@@ -2,10 +2,10 @@ import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
 
-import { updateCategories } from "../redux/actions";
+import { updateCategories } from "../../redux/actions";
 import Category from "./category";
-import { Routes } from "../config";
-import serverCall from "../shared/sharedFunctions";
+import { Routes } from "../../config";
+import serverCall from "../../utilsFolder/utils";
 
 const { AllCategory } = Routes;
 

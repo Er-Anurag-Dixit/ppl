@@ -1,7 +1,7 @@
 import React from "react";
 import { Route, Switch } from "react-router-dom";
-import SinglePost from "../singlepost/singlepost";
-import Timeline from "../timeline/timeline";
+import SinglePost from "../../screens/singlepost";
+import Timeline from "../../screens/timeline";
 import LoginComponent from "../login/login";
 import Signup from "../signup/Signup";
 

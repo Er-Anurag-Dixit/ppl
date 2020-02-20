@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 
 import Comment from "./comment";
-import serverCall from "../shared/sharedFunctions";
-import { Routes } from "../config";
+import serverCall from "../../utilsFolder/utils";
+import { Routes } from "../../config";
 
 const { AllComments, Comments } = Routes;
 

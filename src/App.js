@@ -1,9 +1,9 @@
 import React from "react";
 import { Provider } from "react-redux";
 
-import AppRouters from "./routefolder/route";
+import AppRouters from "./components/routefolder/route";
 import store from "./redux/store";
-import { ErrorMessage } from "./shared/sharedFunctions";
+import { ErrorMessage } from "./utilsFolder/utils";
 
 class App extends React.Component {
   constructor() {

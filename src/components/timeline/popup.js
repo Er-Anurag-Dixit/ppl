@@ -2,7 +2,7 @@ import React from "react";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
 
-import { updateCategories } from "../redux/actions";
+import { updateCategories } from "../../redux/actions";
 
 function Popup(props) {
   const { handleSubmit, category, togglePopup } = props;

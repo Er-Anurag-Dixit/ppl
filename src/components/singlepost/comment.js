@@ -1,8 +1,8 @@
 import React from "react";
 import PropTypes from "prop-types";
+
 export default function Comment(props) {
   const { user, comment } = props.comments;
-
   return (
     <div>
       <li>
