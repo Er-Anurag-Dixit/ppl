@@ -4,6 +4,7 @@ var userApi = require("./userapi");
 var userschema2 = require("./userschema2");
 var userschema4 = require("./comments");
 var userdb = require("./userschema");
+const jwt = require('jsonwebtoken');
 
 approuter.post("/signup", async (req, res) => {
   let result = await userApi.get_data(req.body);
@@ -23,11 +24,16 @@ approuter.post("/login", async (req, res) => {
     let results = await userApi.exist(req.body);
     if (results.length) {
       let data = await userApi.get_data(req.body);
-      let addStatusInResult = {
-        dataFromDatabase: data,
-        status: "logged in successfully"
-      };
-      res.send(addStatusInResult);
+      jwt.sign(req.body, 'privatekey', { expiresIn: '1h' },(err, token) => {
+        if(err) { console.log(err) }    
+        let addStatusInResult = {
+          dataFromDatabase: data,
+          statusCode:200,
+          status: "logged in successfully",
+          token,
+        };
+        res.send(addStatusInResult);
+    });
     } else {
       res.send("wrong password");
     }
