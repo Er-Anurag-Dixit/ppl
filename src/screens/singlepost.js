@@ -34,7 +34,7 @@ const SinglePost = props => {
     serverCall(Likes_Post, likedData).then(res => {
       if (res) {
         let PostDataOnLike = PostData;
-        PostDataOnLike[zero].likes = res.data.dataFromDatabase[zero].likes;
+        PostDataOnLike[zero].likes = res?.data?.dataFromDatabase[zero]?.likes;
         setPostData([...PostDataOnLike]);
       }
     });
@@ -65,14 +65,14 @@ const SinglePost = props => {
       })
       .catch(err => {
         if (err.message === "Network Error") {
-          this.props.history.push("/errorpage");
+          props.history.push("/errorpage");
         }
       });
   };
 
   const notLogin = () => {
     if (!localStorage.getItem("userId")) {
-      this.props.history.push("/login");
+      props.history.push("/login");
     }
   };
 

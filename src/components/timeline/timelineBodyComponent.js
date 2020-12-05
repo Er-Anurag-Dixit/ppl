@@ -73,7 +73,7 @@ const TimelineBodyComponent = props => {
       const newCategory = event.target.category.value;
       const categoryToBeUploaded = { category: newCategory };
       serverCall(Upload_Category, categoryToBeUploaded).then(res => {
-        if (res && res.data && res.data.status === "Category Inserted") {
+        if (res?.data?.status === "Category Inserted") {
           let allCategory = res?.data?.dataFromDatabase?.map(data => {
             return data;
           });
@@ -102,12 +102,12 @@ const TimelineBodyComponent = props => {
       formdata.append("category", category);
       formdata.append("file", file);
       serverCall(Upload, formdata).then(res => {
-        if (res && res.data?.status === "Post Inserted") {
-          this.allPost(zero);
+        if (res?.data?.status === "Post Inserted") {
+          props.allPost(zero);
         } else {
           alert("not inserted");
         }
-        this.togglePopup();
+        togglePopup();
       });
     }
   };
@@ -145,7 +145,7 @@ const TimelineBodyComponent = props => {
         <div className="content">
           <div className="content_rgt">
             <FormOpenButton
-              togglePopup={togglePopup.bind(this)}
+              togglePopup={togglePopup}
               categoryUploadForm={categoryUploadForm}
             />
             <CategoryComponent

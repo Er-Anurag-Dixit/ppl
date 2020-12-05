@@ -35,7 +35,7 @@ const Timeline = props => {
     userDetails();
   }, []);
 
-  const userDetails = function() {
+  const userDetails = ()=> {
     let UserID = { id: localStorage.getItem("userId") };
     serverCall(UserData, UserID).then(res => {
       if (res && res.data) username = res.data[zero]?.username;
@@ -136,7 +136,7 @@ const Timeline = props => {
     <div>
       ("
       <TimelineBodyComponent
-        togglePopup={togglePopup.bind(this)}
+        togglePopup={togglePopup}
         username={username}
         showMyUploads={showMyUploads}
         stateUpdateOnTimelineClick={stateUpdateOnTimelineClick}
@@ -149,6 +149,7 @@ const Timeline = props => {
         hasError={hasError}
         downLoad={DownloadImage}
         emailId={emailId}
+        allPost={allPost}
       />
     </div>
   );
