@@ -2,10 +2,13 @@ import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
 
-import { updateCategories } from "../redux/actions";
+import { updateCategories } from "../../redux/actions";
 import Category from "./category";
-import { Routes } from "../config";
-import serverCall from "../shared/sharedFunctions";
+import { Routes } from "../../config";
+import serverCall from "../../utilsFolder/utils";
+import { all_categories } from "../../redux/saga";
+import { all } from "redux-saga/effects";
+import store from "../../redux/store";
 
 const { AllCategory } = Routes;
 
@@ -67,14 +70,7 @@ const { AllCategory } = Routes;
 
 const CategoryList = React.memo(props => {
   const allcategories = () => {
-    serverCall(AllCategory).then(res => {
-      if (res && res.data) {
-        let allCategoryData = res.data?.dataFromDatabase?.map(category => {
-          return category;
-        });
-        props.updateCategory(allCategoryData);
-      }
-    });
+    props.all_categories();
   };
 
   useEffect(() => {
@@ -118,7 +114,8 @@ function mapStateToProps(state) {
 
 const mapDispatchToProps = dispatch => {
   return {
-    updateCategory: data => dispatch(updateCategories(data))
+    updateCategory: data => dispatch(updateCategories(data)),
+    all_categories: () => dispatch(all_categories())
   };
 };
 

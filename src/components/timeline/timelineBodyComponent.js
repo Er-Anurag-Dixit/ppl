@@ -1,26 +1,29 @@
-import React, { useCallback, useState } from "react";
-// import InfiniteLoader from "react-window-infinite-loader";
+import React, { useState } from "react";
 import Helmet from "react-helmet";
-// import { FixedSizeList } from "react-window";
 import PropTypes from "prop-types";
 import { connect } from "react-redux";
+// import { FixedSizeList } from "react-window";
+// import InfiniteLoader from "react-window-infinite-loader";
 
 import Popup from "./popup.js";
-import RightButton from "./rightButton";
+import FormOpenButton from "./formOpenButton";
 import "./style.css";
 import Featured from "../shared/featured";
 import UserProfileComponent from "./userProfileComponent";
 // import CategoryList from "../shared/categories";
 import Scroller from "./scroller";
-import serverCall from "../shared/sharedFunctions";
+import serverCall from "../../utilsFolder/utils";
 // import CategoryForm from "../shared/categoryForm";
 import CategoryComponent from "../shared/CategoryComponent";
-import { updateCategories } from "../redux/actions";
-import { Routes } from "../config";
+import { updateCategories } from "../../redux/actions";
+import { WatchEveryCategoryUpdate } from "../../redux/saga.js";
+import store from "../../redux/store.js";
+import { Routes } from "../../config";
 
-const { Upload_Category } = Routes;
+const { Upload_Category, Upload } = Routes;
 
 let k = 0;
+const zero = 0;
 
 const TimelineBodyComponent = props => {
   // const getPost = ({ index, style }) => {
@@ -45,6 +48,7 @@ const TimelineBodyComponent = props => {
   // );
 
   const [clicked, setClicked] = useState(false);
+  const [emailId, setEmailId] = useState(props.emailId);
 
   const categoryUploadForm = () => {
     if (!clicked) {
@@ -69,14 +73,42 @@ const TimelineBodyComponent = props => {
       const newCategory = event.target.category.value;
       const categoryToBeUploaded = { category: newCategory };
       serverCall(Upload_Category, categoryToBeUploaded).then(res => {
-        if (res && res.data && res.data.status === "Category Inserted") {
+        if (res?.data?.status === "Category Inserted") {
           let allCategory = res?.data?.dataFromDatabase?.map(data => {
             return data;
           });
+
           props.updateCategory(allCategory);
         }
       });
       setClicked(false);
+    }
+  };
+
+  const handlePostUploadForm = function(event) {
+    event.preventDefault();
+    if (event?.target?.category?.value === "none") {
+      document.getElementById("category123").focus();
+    } else {
+      let category = event.target.category.value;
+      let file = event.target.file.files[0];
+      let caption = event.target.description.value;
+      let userName = username;
+      let userEmail = emailId;
+      const formdata = new FormData();
+      formdata.append("username", userName);
+      formdata.append("email", userEmail);
+      formdata.append("caption", caption);
+      formdata.append("category", category);
+      formdata.append("file", file);
+      serverCall(Upload, formdata).then(res => {
+        if (res?.data?.status === "Post Inserted") {
+          props.allPost(zero);
+        } else {
+          alert("not inserted");
+        }
+        togglePopup();
+      });
     }
   };
 
@@ -87,7 +119,7 @@ const TimelineBodyComponent = props => {
     username,
     showMyUploads,
     stateUpdateOnTimelineClick,
-    handlePostUploadForm,
+    // handlePostUploadForm,
     // items,
     loadMorePosts,
     hasMoreItems,
@@ -112,8 +144,8 @@ const TimelineBodyComponent = props => {
       <div className="container">
         <div className="content">
           <div className="content_rgt">
-            <RightButton
-              togglePopup={togglePopup.bind(this)}
+            <FormOpenButton
+              togglePopup={togglePopup}
               categoryUploadForm={categoryUploadForm}
             />
             <CategoryComponent
@@ -183,7 +215,7 @@ TimelineBodyComponent.propTypes = {
   username: PropTypes.string,
   showMyUploads: PropTypes.func,
   stateUpdateOnTimelineClick: PropTypes.func,
-  handlePostUploadForm: PropTypes.func,
+  // handlePostUploadForm: PropTypes.func,
   items: PropTypes.number,
   loadMorePosts: PropTypes.func,
   hasMoreItems: PropTypes.bool,

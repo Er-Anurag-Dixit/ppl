@@ -3,7 +3,7 @@ import axios from "axios";
 import { Link } from "react-router-dom";
 import Helmet from "react-helmet";
 
-import Server from "../config";
+import Server from "../../config";
 import SignupForm from "./signupForm";
 import WelcomeComponent from "../shared/welcomeComponent";
 

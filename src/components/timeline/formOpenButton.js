@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 
 import Button from "./button";
 
-const RightButton = React.memo(props => {
+const FormOpenButton = React.memo(props => {
   const { togglePopup, categoryUploadForm } = props;
 
   return (
@@ -13,9 +13,9 @@ const RightButton = React.memo(props => {
     </div>
   );
 });
-RightButton.propTypes = {
+FormOpenButton.propTypes = {
   logout: PropTypes.func,
   togglePopup: PropTypes.func,
   categoryUploadForm: PropTypes.func
 };
-export default RightButton;
+export default FormOpenButton;

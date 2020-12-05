@@ -3,7 +3,7 @@ import moment from "moment";
 import { Link } from "react-router-dom";
 import PropTypes from "prop-types";
 
-import { ServerUrl } from "../config";
+import { ServerUrl } from "../../config";
 
 const Post = React.memo(props => {
   const { caption, category, username, date, _id, image } = props.data;

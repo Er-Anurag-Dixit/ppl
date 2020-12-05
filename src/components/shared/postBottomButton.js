@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-const PostBottomButton = React.memo(props => {
+const PostBottomButton = props => {
   const { name, value, image } = props;
   const zero = "0";
   return (
@@ -12,7 +12,7 @@ const PostBottomButton = React.memo(props => {
       {value ? value : zero} {name}
     </div>
   );
-});
+};
 PostBottomButton.propType = {
   name: PropTypes.string,
   value: PropTypes.number

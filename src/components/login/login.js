@@ -3,8 +3,8 @@ import { Link } from "react-router-dom";
 import Helmet from "react-helmet";
 
 import WelcomeComponent from "../shared/welcomeComponent";
-import { Routes } from "../config";
-import fetchData from "../shared/sharedFunctions";
+import { Routes } from "../../config";
+import fetchData from "../../utilsFolder/utils";
 const { Login } = Routes;
 const isLogin = () => localStorage.getItem("userId");
 
@@ -14,7 +14,6 @@ const onLoginSubmit = function(event) {
     email: event.target.email.value,
     password: event.target.password.value
   };
-
   this.login(loginData);
 };
 
@@ -31,11 +30,12 @@ export default class LoginComponent extends React.Component {
   }
   login = loginData => {
     fetchData(Login, loginData).then(res => {
-      if (res?.data?.status === "logged in successfully") {
+      if (res?.data?.statusCode === 200) {
         let id = res?.data?.dataFromDatabase[0]?._id;
         let username = res?.data?.dataFromDatabase[0]?.username;
         localStorage.setItem("userId", id);
         localStorage.setItem("username", username);
+        localStorage.setItem('token', res.data.token)
         this.props.history.push("/timeline");
       } else if (res?.data === "wrong password") {
         this.setState({
@@ -54,7 +54,6 @@ export default class LoginComponent extends React.Component {
   };
 
   static getDerivedStateFromError(error) {
-    // Update state so the next render will show the fallback UI.
     return { hasError: true };
   }
 
