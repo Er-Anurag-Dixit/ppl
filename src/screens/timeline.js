@@ -130,7 +130,7 @@ const Timeline = props => {
     setItems(zero);
     myUploads = true;
     await totalNumberPosts();
-    await allPost(items);
+    await allPost(0);
   };
   return (
     <div>

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { connect } from "react-redux";
 import PropTypes from "prop-types";
 
@@ -6,13 +6,16 @@ import LeftHeader from "./leftHeader";
 import RightHeader from "./rightHeader";
 import { resetLoginState } from "../../redux/actions";
 
-const Header = props => {
-  const logout = () => {
+const Header = (props) => {
+  const { loginState,callResetLoginState } = props;
+
+  const logout = useCallback(() => {
     localStorage.removeItem("userId");
     localStorage.removeItem("username");
-    this.props.resetLoginState();
-  };
-  const { loginState } = props;
+    localStorage.removeItem("token");
+    callResetLoginState();
+  },[]);
+
   return (
     <div>
       <div className="header">
@@ -33,7 +36,7 @@ function mapStateToProps(state) {
 
 const mapDispatchToProps = dispatch => {
   return {
-    resetLoginState: () => dispatch(resetLoginState())
+    callResetLoginState: () => dispatch(resetLoginState())
   };
 };
 
